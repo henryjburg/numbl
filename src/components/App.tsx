@@ -309,6 +309,19 @@ const App: React.FC = () => {
 
     // Check all rows and columns for guessing eligibility
     checkForGuessingEligibility(newBoard);
+
+    // Advance to next cell in current focus direction
+    if (isColumnFocus) {
+      // In column focus, move to next row in same column
+      if (row < 3) {
+        setSelected({ row: row + 1, col });
+      }
+    } else {
+      // In row focus, move to next column in same row
+      if (col < 3) {
+        setSelected({ row, col: col + 1 });
+      }
+    }
   };
 
   // Handle guess
