@@ -50,16 +50,6 @@ export const calculateRunningScore = (
 
   const totalScore = correctGuessPoints + firstTimeCorrectBonus;
 
-  console.log('Running score calculation:', {
-    correctGuesses,
-    wrongGuesses,
-    firstTimeCorrectRows,
-    firstTimeCorrectCols,
-    correctGuessPoints,
-    firstTimeCorrectBonus,
-    totalScore
-  });
-
   // No time bonuses, no efficiency bonuses, no perfect accuracy bonuses during gameplay
   return totalScore;
 };

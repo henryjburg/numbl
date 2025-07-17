@@ -87,10 +87,22 @@ const App: React.FC = () => {
         return;
       }
 
-      // Number input (1-9)
-      if (/^[1-9]$/.test(key)) {
+      // Number input (1-9, 0 for 10, a-f for 11-16)
+      if (/^[1-9a-f]$/.test(key)) {
         if (selected) {
-          handleNumberInput(key);
+          // Don't allow input if the cell is already correct
+          if (feedback[selected.row][selected.col] === 'correct' && board[selected.row][selected.col] === feedbackNumbers[selected.row][selected.col]) {
+            return;
+          }
+          let num = key;
+          if (key === '0') num = '10';
+          else if (key === 'a') num = '11';
+          else if (key === 'b') num = '12';
+          else if (key === 'c') num = '13';
+          else if (key === 'd') num = '14';
+          else if (key === 'e') num = '15';
+          else if (key === 'f') num = '16';
+          handleNumberInput(num);
         }
         return;
       }
@@ -328,15 +340,21 @@ const App: React.FC = () => {
             newFeedback[guess.index][c] = 'correct';
             newFeedbackNumbers[guess.index][c] = val;
             newCorrectGuesses++; // Correct position
-          } else if (puzzle.solution[guess.index].includes(Number(val))) {
-            newFeedback[guess.index][c] = 'misplaced';
-            newFeedbackNumbers[guess.index][c] = val;
-            newCorrectGuesses++; // Correct number, wrong position
           } else if (puzzle.solution.some(row => row.includes(Number(val)))) {
-            newFeedback[guess.index][c] = 'exists-elsewhere';
-            newFeedbackNumbers[guess.index][c] = val;
-            newCorrectGuesses++; // Exists in puzzle but not in this row
+            // Number exists in puzzle - check if it's in this row or column
+            if (puzzle.solution[guess.index].includes(Number(val))) {
+              // Number exists in this row but wrong position - show as misplaced
+              newFeedback[guess.index][c] = 'misplaced';
+              newFeedbackNumbers[guess.index][c] = val;
+              newCorrectGuesses++; // Correct number, wrong position
+            } else {
+              // Number exists in puzzle but not in this row - show as exists-elsewhere
+              newFeedback[guess.index][c] = 'exists-elsewhere';
+              newFeedbackNumbers[guess.index][c] = val;
+              newCorrectGuesses++; // Exists in puzzle but not in this row
+            }
           } else {
+            // Number doesn't exist in puzzle at all
             newFeedback[guess.index][c] = 'wrong';
             newFeedbackNumbers[guess.index][c] = val;
             newWrongGuesses++;
@@ -349,15 +367,22 @@ const App: React.FC = () => {
             newFeedback[r][guess.index] = 'correct';
             newFeedbackNumbers[r][guess.index] = val;
             newCorrectGuesses++; // Correct position
-          } else if (puzzle.solution.map(row => row[guess.index]).includes(Number(val))) {
-            newFeedback[r][guess.index] = 'misplaced';
-            newFeedbackNumbers[r][guess.index] = val;
-            newCorrectGuesses++; // Correct number, wrong position
           } else if (puzzle.solution.some(row => row.includes(Number(val)))) {
-            newFeedback[r][guess.index] = 'exists-elsewhere';
-            newFeedbackNumbers[r][guess.index] = val;
-            newCorrectGuesses++; // Exists in puzzle but not in this column
+            // Number exists in puzzle - check if it's in this row or column
+            const columnValues = puzzle.solution.map(row => row[guess.index]);
+            if (columnValues.includes(Number(val))) {
+              // Number exists in this column but wrong position - show as misplaced
+              newFeedback[r][guess.index] = 'misplaced';
+              newFeedbackNumbers[r][guess.index] = val;
+              newCorrectGuesses++; // Correct number, wrong position
+            } else {
+              // Number exists in puzzle but not in this column - show as exists-elsewhere
+              newFeedback[r][guess.index] = 'exists-elsewhere';
+              newFeedbackNumbers[r][guess.index] = val;
+              newCorrectGuesses++; // Exists in puzzle but not in this column
+            }
           } else {
+            // Number doesn't exist in puzzle at all
             newFeedback[r][guess.index] = 'wrong';
             newFeedbackNumbers[r][guess.index] = val;
             newWrongGuesses++;
@@ -569,16 +594,27 @@ const App: React.FC = () => {
         </div>
       </div>
       <div className="numbl-inputs">
-        {[1,2,3,4,5,6,7,8,9].map(n => (
-          <button
-            key={n}
-            className="numbl-num-btn"
-            onClick={() => handleNumberInput(String(n))}
-            disabled={!selected || (selected && feedback[selected.row][selected.col] === 'correct')}
-          >
-            {n}
-          </button>
-        ))}
+        {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].map(n => {
+                    // Check if this number is correctly placed anywhere in the puzzle
+          const isNumberCorrectlyPlaced = feedback.some((row, rowIndex) =>
+            row.some((cellFeedback, colIndex) =>
+              cellFeedback === 'correct' &&
+              feedbackNumbers[rowIndex][colIndex] === String(n) &&
+              board[rowIndex][colIndex] === String(n)
+            )
+          );
+
+          return (
+            <button
+              key={n}
+              className="numbl-num-btn"
+              onClick={() => handleNumberInput(String(n))}
+              disabled={!selected || isNumberCorrectlyPlaced}
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
       <button
         className="numbl-guess-btn"

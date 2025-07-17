@@ -147,7 +147,13 @@ body, .numbl-root {
   100% { box-shadow: 0 0 0 8px #b5ead733; }
 }
 .feedback-misplaced {
-  background: #ffe082 !important;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffe082,
+    #ffe082 2px,
+    #fff3cd 2px,
+    #fff3cd 4px
+  ) !important;
   animation: misplacedAnim 0.3s;
 }
 @keyframes misplacedAnim {
@@ -164,18 +170,23 @@ body, .numbl-root {
 }
 
 .feedback-exists-elsewhere {
-  background: repeating-linear-gradient(
-    45deg,
-    #ffe082,
-    #ffe082 2px,
-    #fff3cd 2px,
-    #fff3cd 4px
-  ) !important;
+  background: #e0e0e0 !important;
   animation: existsElsewhereAnim 0.3s;
 }
 @keyframes existsElsewhereAnim {
-  0% { box-shadow: 0 0 0 0 #ffe082; }
-  100% { box-shadow: 0 0 0 8px #ffe08233; }
+  0% { box-shadow: 0 0 0 0 #e0e0e0; }
+  100% { box-shadow: 0 0 0 8px #e0e0e033; }
+}
+
+
+
+.feedback-exists-elsewhere {
+  background: #e0e0e0 !important;
+  animation: existsElsewhereAnim 0.3s;
+}
+@keyframes existsElsewhereAnim {
+  0% { box-shadow: 0 0 0 0 #e0e0e0; }
+  100% { box-shadow: 0 0 0 8px #e0e0e033; }
 }
 
 .duplicate {
@@ -309,10 +320,10 @@ body, .numbl-root {
 
 .numbl-inputs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.3rem;
   margin-bottom: 0.8rem;
-  width: 8.1rem;
+  width: 10.8rem;
   justify-items: center;
   align-items: center;
   margin-left: auto;
@@ -541,6 +552,7 @@ body, .numbl-root {
   .numbl-inputs {
     gap: 0.25rem;
     max-width: 100%;
+    width: 9.6rem;
   }
   .numbl-num-btn {
     height: 2.8rem;

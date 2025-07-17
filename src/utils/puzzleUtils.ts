@@ -58,68 +58,63 @@ export const isPuzzleComplete = (feedback: FeedbackType[][]): boolean => {
   return feedback.every(row => row.every(cell => cell === 'correct'));
 };
 
-// Check for duplicates in a row or column
+// Check for duplicates in the entire grid (enforcing uniqueness constraint)
 export const getDuplicates = (board: string[][]): Set<string> => {
   const duplicates = new Set<string>();
+  const allNumbers = new Map<string, number>();
 
-  // Check rows for duplicates
+  // Collect all numbers and their positions
   for (let row = 0; row < 4; row++) {
-    const rowNumbers = board[row].filter(cell => cell !== '');
-    const uniqueNumbers = new Set(rowNumbers);
-    if (rowNumbers.length !== uniqueNumbers.size) {
-      // Find which numbers are duplicated
-      const counts = new Map<string, number>();
-      rowNumbers.forEach(num => {
-        counts.set(num, (counts.get(num) || 0) + 1);
-      });
-      counts.forEach((count, num) => {
-        if (count > 1) {
-          // Mark all instances of this number in this row as duplicates
-          for (let col = 0; col < 4; col++) {
-            if (board[row][col] === num) {
-              duplicates.add(`${row},${col}`);
-            }
-          }
-        }
-      });
+    for (let col = 0; col < 4; col++) {
+      const cell = board[row][col];
+      if (cell !== '') {
+        const count = allNumbers.get(cell) || 0;
+        allNumbers.set(cell, count + 1);
+      }
     }
   }
 
-  // Check columns for duplicates
-  for (let col = 0; col < 4; col++) {
-    const colNumbers = board.map(row => row[col]).filter(cell => cell !== '');
-    const uniqueNumbers = new Set(colNumbers);
-    if (colNumbers.length !== uniqueNumbers.size) {
-      // Find which numbers are duplicated
-      const counts = new Map<string, number>();
-      colNumbers.forEach(num => {
-        counts.set(num, (counts.get(num) || 0) + 1);
-      });
-      counts.forEach((count, num) => {
-        if (count > 1) {
-          // Mark all instances of this number in this column as duplicates
-          for (let row = 0; row < 4; row++) {
-            if (board[row][col] === num) {
-              duplicates.add(`${row},${col}`);
-            }
+  // Mark duplicates across the entire grid
+  allNumbers.forEach((count, num) => {
+    if (count > 1) {
+      // Mark all instances of this number as duplicates
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          if (board[row][col] === num) {
+            duplicates.add(`${row},${col}`);
           }
         }
-      });
+      }
     }
-  }
+  });
 
   return duplicates;
 };
 
-// Check if a specific row or column has duplicates
+// Check if the entire grid has duplicates (enforcing uniqueness constraint)
 export const hasDuplicatesInLine = (board: string[][], lineType: 'row' | 'col', index: number): boolean => {
-  const line = lineType === 'row'
-    ? board[index]
-    : board.map(row => row[index]);
+  const allNumbers = new Map<string, number>();
 
-  const numbers = line.filter(cell => cell !== '');
-  const uniqueNumbers = new Set(numbers);
-  return numbers.length !== uniqueNumbers.size;
+  // Collect all numbers in the grid
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      const cell = board[row][col];
+      if (cell !== '') {
+        const count = allNumbers.get(cell) || 0;
+        allNumbers.set(cell, count + 1);
+      }
+    }
+  }
+
+  // Check if any number appears more than once
+  for (let i = 0; i < allNumbers.size; i++) {
+    const count = Array.from(allNumbers.values())[i];
+    if (count > 1) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 // Generate unique hash for puzzle

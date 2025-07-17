@@ -1,23 +1,23 @@
 import { Puzzle } from '../types/puzzle';
 
-// Example puzzle (solution and constraints)
+// Example puzzle (solution and constraints) - using numbers 1-16 with uniqueness
 export const examplePuzzle: Puzzle = {
   solution: [
-    [7, 5, 6, 2],
-    [1, 9, 4, 6],
-    [3, 8, 2, 7],
-    [9, 1, 5, 4],
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, 16],
   ],
   rowConstraints: [
-    { sum: 20 },
-    { sum: 20 },
-    { sum: 20 },
-    { sum: 19 },
+    { sum: 10 },
+    { sum: 26 },
+    { sum: 42 },
+    { sum: 58 },
   ],
   colConstraints: [
-    { onlyOdd: true },
-    { sum: 23 },
-    { unique: true },
-    { sum: 19 },
+    { sum: 28 },
+    { sum: 32 },
+    { sum: 36 },
+    { sum: 40 },
   ],
 };
