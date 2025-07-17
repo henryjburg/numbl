@@ -44,7 +44,6 @@ body, .numbl-root {
 
 .numbl-timer {
   font-size: 1.2rem;
-  margin-bottom: 0.5rem;
   color: #6c757d;
   font-family: 'Courier New', monospace;
   font-weight: 600;
@@ -85,6 +84,16 @@ body, .numbl-root {
   margin-right: auto;
 }
 
+.numbl-cell.focus-highlight {
+  border: 3px solid #a29bfe;
+  box-shadow: 0 0 8px rgba(162, 155, 254, 0.3);
+}
+
+.numbl-cell.selected.focus-highlight {
+  border: 4px solid #6c5ce7;
+  box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3), 0 0 8px rgba(162, 155, 254, 0.3);
+}
+
 .numbl-grid {
   border-collapse: separate;
   border-spacing: 0.5rem;
@@ -117,10 +126,10 @@ body, .numbl-root {
   box-sizing: border-box;
 }
 .numbl-cell.selected {
-  border: 4px solid #4a5568;
+  border: 4px solid #8b7355;
   z-index: 2;
   animation: pop 0.18s;
-  box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.3);
+  box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.3);
 }
 @keyframes pop {
   0% { transform: scale(1); }
@@ -152,6 +161,21 @@ body, .numbl-root {
 @keyframes wrongAnim {
   0% { box-shadow: 0 0 0 0 #e0e0e0; }
   100% { box-shadow: 0 0 0 8px #e0e0e033; }
+}
+
+.feedback-exists-elsewhere {
+  background: repeating-linear-gradient(
+    45deg,
+    #ffe082,
+    #ffe082 2px,
+    #fff3cd 2px,
+    #fff3cd 4px
+  ) !important;
+  animation: existsElsewhereAnim 0.3s;
+}
+@keyframes existsElsewhereAnim {
+  0% { box-shadow: 0 0 0 0 #ffe082; }
+  100% { box-shadow: 0 0 0 8px #ffe08233; }
 }
 
 .duplicate {
@@ -192,6 +216,14 @@ body, .numbl-root {
   padding: 0.3rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border: 1px solid #e9ecef;
+  box-sizing: border-box;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.numbl-constraints-section.focused {
+  outline: 3px solid #6c5ce7;
+  outline-offset: 0px;
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.3);
 }
 
 .numbl-constraints-section h3 {
@@ -240,7 +272,7 @@ body, .numbl-root {
 }
 
 .numbl-constraint-text.guessed-correct {
-  background: #d4edda;
+  background: #b5ead7;
   color: #155724;
 }
 
@@ -355,9 +387,31 @@ body, .numbl-root {
   transform: scale(0.97);
 }
 .numbl-guess-btn:disabled {
-  background: #e0e0e0;
-  color: #bbb;
+  background: #e9ecef;
+  color: #6c757d;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.numbl-credits {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+.numbl-credits a {
+  color: #6c757d;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.numbl-credits a:hover {
+  color: #495057;
+  text-decoration: underline;
 }
 
 .win-modal {
@@ -563,4 +617,104 @@ body, .numbl-root {
     transform: translateY(100vh) rotate(720deg);
     opacity: 0;
   }
+}
+
+/* Scoring UI */
+.numbl-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.numbl-timer {
+  font-size: 1.2rem;
+  color: #6c757d;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.numbl-timer .emoji {
+  margin-right: 0.3em;
+}
+
+.numbl-score {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.numbl-score.vibrate {
+  animation: scoreVibrate 0.3s ease-in-out;
+}
+
+@keyframes scoreVibrate {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.numbl-score svg, .numbl-score img, .numbl-score .emoji {
+  margin-right: 0.25em;
+  font-size: 1em;
+  vertical-align: middle;
+}
+
+/* Score breakdown in win modal */
+.score-breakdown {
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.score-breakdown h3 {
+  margin: 0 0 15px 0;
+  color: #ffd700;
+  text-align: center;
+}
+
+.score-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.score-row.total {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 8px;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #ffd700;
+}
+
+.score-row.multipliers {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.multiplier {
+  background: rgba(255, 215, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-left: 10px;
 }
