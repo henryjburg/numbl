@@ -89,48 +89,42 @@ export const isPuzzleComplete = (feedback: FeedbackType[][]): boolean => {
   return feedback.every(row => row.every(cell => cell === 'correct'));
 };
 
+const getLineDuplicates = (line: string[]): Set<string> => {
+  const duplicates = new Set<string>();
+  const counts = new Map<string, number>();
+
+  line.forEach((cell, index) => {
+    if (cell !== '') {
+      const count = (counts.get(cell) || 0) + 1;
+      counts.set(cell, count);
+      if (count > 1) {
+        line.forEach((c, i) => {
+          if (c === cell) duplicates.add(`${index},${i}`);
+        });
+      }
+    }
+  });
+
+  return duplicates;
+};
+
 export const getDuplicates = (board: string[][]): Set<string> => {
   const duplicates = new Set<string>();
 
   for (let row = 0; row < 4; row++) {
-    const rowNumbers = new Map<string, number>();
-    for (let col = 0; col < 4; col++) {
-      const cell = board[row][col];
-      if (cell !== '') {
-        const count = rowNumbers.get(cell) || 0;
-        rowNumbers.set(cell, count + 1);
-      }
-    }
-
-    rowNumbers.forEach((count, num) => {
-      if (count > 1) {
-        for (let col = 0; col < 4; col++) {
-          if (board[row][col] === num) {
-            duplicates.add(`${row},${col}`);
-          }
-        }
-      }
+    const rowDuplicates = getLineDuplicates(board[row]);
+    rowDuplicates.forEach(pos => {
+      const [, c] = pos.split(',').map(Number);
+      duplicates.add(`${row},${c}`);
     });
   }
 
   for (let col = 0; col < 4; col++) {
-    const colNumbers = new Map<string, number>();
-    for (let row = 0; row < 4; row++) {
-      const cell = board[row][col];
-      if (cell !== '') {
-        const count = colNumbers.get(cell) || 0;
-        colNumbers.set(cell, count + 1);
-      }
-    }
-
-    colNumbers.forEach((count, num) => {
-      if (count > 1) {
-        for (let row = 0; row < 4; row++) {
-          if (board[row][col] === num) {
-            duplicates.add(`${row},${col}`);
-          }
-        }
-      }
+    const colLine = board.map(row => row[col]);
+    const colDuplicates = getLineDuplicates(colLine);
+    colDuplicates.forEach(pos => {
+      const [, c] = pos.split(',').map(Number);
+      duplicates.add(`${c},${col}`);
     });
   }
 
@@ -142,34 +136,16 @@ export const hasDuplicatesInLine = (
   lineType: 'row' | 'col',
   index: number
 ): boolean => {
+  const line = lineType === 'row' ? board[index] : board.map(row => row[index]);
   const numbers = new Map<string, number>();
 
-  if (lineType === 'row') {
-    for (let col = 0; col < 4; col++) {
-      const cell = board[index][col];
-      if (cell !== '') {
-        const count = numbers.get(cell) || 0;
-        numbers.set(cell, count + 1);
-      }
+  line.forEach(cell => {
+    if (cell !== '') {
+      numbers.set(cell, (numbers.get(cell) || 0) + 1);
     }
-  } else {
-    for (let row = 0; row < 4; row++) {
-      const cell = board[row][index];
-      if (cell !== '') {
-        const count = numbers.get(cell) || 0;
-        numbers.set(cell, count + 1);
-      }
-    }
-  }
+  });
 
-  for (let i = 0; i < numbers.size; i++) {
-    const count = Array.from(numbers.values())[i];
-    if (count > 1) {
-      return true;
-    }
-  }
-
-  return false;
+  return Array.from(numbers.values()).some(count => count > 1);
 };
 
 export const generatePuzzleHash = (puzzle: Puzzle): string => {

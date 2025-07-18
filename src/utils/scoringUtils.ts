@@ -53,22 +53,10 @@ export const calculateDifficultyMultiplier = (
   puzzle: Puzzle,
   firstTimeCorrectCells: number
 ): number => {
-  // Count pre-filled cells
-  let preFilledCount = 0;
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
-      if (puzzle.startingBoard[row][col] !== null) {
-        preFilledCount++;
-      }
-    }
-  }
-
-  // Calculate difficulty multiplier based on pre-filled cells
-  // Maximum of 4 pre-filled cells = minimum difficulty (1.0)
-  // Minimum of 0 pre-filled cells = maximum difficulty (2.0)
+  const preFilledCount = puzzle.startingBoard
+    .flat()
+    .filter(cell => cell !== null).length;
   const preFilledDifficultyMultiplier = 2.0 - preFilledCount / 4.0;
-
-  // Combine with correctness multiplier
   const correctnessMultiplier = calculateCorrectnessMultiplier(
     firstTimeCorrectCells
   );

@@ -1,9 +1,3 @@
-/**
- * © 2025 Henry Burgess. All rights reserved.
- *
- * Puzzle Generator - Generates daily puzzles with mathematical constraints
- */
-
 import { Puzzle, Constraint } from '../types/puzzle';
 
 const UNIVERSAL_DATE = '2024-01-01';
@@ -36,9 +30,8 @@ export class PuzzleGenerator {
   }
 
   private shuffleArray<T>(array: T[]): T[] {
-    if (!array || array.length === 0) {
-      return [];
-    }
+    if (!array || array.length === 0) return [];
+
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(this.seededRandom() * (i + 1));
@@ -81,9 +74,7 @@ export class PuzzleGenerator {
         const rowConstraint = rowConstraints[row];
         const colConstraint = colConstraints[col];
 
-        if (rowConstraint.contains || colConstraint.contains) {
-          continue;
-        }
+        if (rowConstraint.contains || colConstraint.contains) continue;
 
         if (rowConstraint.range || colConstraint.range) priority += 2;
         if (
@@ -92,9 +83,7 @@ export class PuzzleGenerator {
         )
           priority += 1;
 
-        if ((row === 0 || row === 3) && (col === 0 || col === 3)) {
-          priority += 2;
-        }
+        if ((row === 0 || row === 3) && (col === 0 || col === 3)) priority += 2;
 
         positions.push({ row, col, priority });
       }
@@ -125,9 +114,7 @@ export class PuzzleGenerator {
     const availableConstraints: Array<{
       constraint: Constraint;
       type: string;
-    }> = [];
-
-    availableConstraints.push({ constraint: { sum }, type: 'sum' });
+    }> = [{ constraint: { sum }, type: 'sum' }];
 
     if (evens === 4) {
       availableConstraints.push({ constraint: { even: true }, type: 'even' });

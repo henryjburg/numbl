@@ -1,10 +1,3 @@
-/**
- * © 2025 Henry Burgess. All rights reserved.
- *
- * Numbl - A challenging number puzzle game
- * This file contains the main application component.
- */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/App.css';
 import { Puzzle, FeedbackType, Constraint } from '../types/puzzle';
@@ -26,6 +19,12 @@ import {
   formatScore,
 } from '../utils/scoringUtils';
 import { ScoreBreakdown, GameStats } from '../types/puzzle';
+import Grid from './Grid';
+import Keyboard from './Keyboard';
+import ConstraintDisplay from './ConstraintDisplay';
+import WinModal from './WinModal';
+import SettingsModal from './SettingsModal';
+import HelpModal from './HelpModal';
 
 const App: React.FC = () => {
   const puzzleGenerator = new PuzzleGenerator();
@@ -1019,264 +1018,53 @@ const App: React.FC = () => {
         </div>
         <div className="numbl-desktop-left-column">
           <div className="numbl-grid-container">
-            <div className="numbl-grid">
-              {board.map((row, rIdx) =>
-                row.map((cell, cIdx) => (
-                  <div
-                    key={`${rIdx}-${cIdx}`}
-                    className={`numbl-cell${selected && selected.row === rIdx && selected.col === cIdx ? ' selected' : ''} ${feedback[rIdx][cIdx] !== 'none' ? `feedback-${feedback[rIdx][cIdx]}` : ''} ${feedback[rIdx][cIdx] === 'misplaced' && arrowDirections[rIdx][cIdx] === 'right' ? ' arrow-right' : ''} ${duplicates.has(`${rIdx},${cIdx}`) ? 'duplicate' : ''} ${feedback[rIdx][cIdx] === 'correct' ? 'locked' : ''} ${isPreFilledCell(rIdx, cIdx) ? 'pre-filled' : ''} ${selected && ((!isColumnFocus && rIdx === selected.row) || (isColumnFocus && cIdx === selected.col)) && !isPreFilledCell(rIdx, cIdx) ? 'focus-highlight' : ''}`}
-                    onClick={() => handleCellClick(rIdx, cIdx)}
-                  >
-                    {cell}
-                  </div>
-                ))
-              )}
-            </div>
+            <Grid
+              board={board}
+              selected={selected}
+              feedback={feedback}
+              arrowDirections={arrowDirections}
+              duplicates={duplicates}
+              isPreFilledCell={isPreFilledCell}
+              isColumnFocus={isColumnFocus}
+              handleCellClick={handleCellClick}
+            />
           </div>
           <div className="numbl-desktop-right-column">
             <div className="numbl-constraints-container">
-              {selected && (
-                <div className="numbl-constraints-section">
-                  <div className="numbl-constraint-row">
-                    <span className="numbl-constraint-label">
-                      {isColumnFocus
-                        ? `Column ${selected.col + 1}`
-                        : `Row ${selected.row + 1}`}
-                    </span>
-                    <div
-                      className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, isColumnFocus ? 'col' : 'row', isColumnFocus ? selected.col : selected.row) ? 'guessed-correct' : ''}`}
-                    >
-                      <div className="numbl-constraint-content">
-                        <span className="numbl-constraint-name">
-                          {getConstraintName(
-                            isColumnFocus
-                              ? puzzle.colConstraints[selected.col]
-                              : puzzle.rowConstraints[selected.row]
-                          )}
-                        </span>
-                        {getConstraintValue(
-                          isColumnFocus
-                            ? puzzle.colConstraints[selected.col]
-                            : puzzle.rowConstraints[selected.row]
-                        ) && (
-                          <span
-                            className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
-                          >
-                            {getConstraintValue(
-                              isColumnFocus
-                                ? puzzle.colConstraints[selected.col]
-                                : puzzle.rowConstraints[selected.row]
-                            )}
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        className="numbl-constraint-info-btn"
-                        onMouseEnter={e =>
-                          handleConstraintInfoShow(
-                            e,
-                            isColumnFocus
-                              ? puzzle.colConstraints[selected.col]
-                              : puzzle.rowConstraints[selected.row],
-                            isColumnFocus ? 'col' : 'row'
-                          )
-                        }
-                        onMouseLeave={handleConstraintInfoHide}
-                        onClick={e =>
-                          handleConstraintInfoShow(
-                            e,
-                            isColumnFocus
-                              ? puzzle.colConstraints[selected.col]
-                              : puzzle.rowConstraints[selected.row],
-                            isColumnFocus ? 'col' : 'row'
-                          )
-                        }
-                        aria-label="Constraint information"
-                      >
-                        {/* SVG info icon */}
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <circle
-                            cx="10"
-                            cy="10"
-                            r="8"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            fill="none"
-                          />
-                          <rect
-                            x="9"
-                            y="8"
-                            width="2"
-                            height="6"
-                            rx="1"
-                            fill="currentColor"
-                          />
-                          <circle cx="10" cy="6" r="1.2" fill="currentColor" />
-                        </svg>
-                        {constraintTooltipVisible && (
-                          <div className="numbl-constraint-tooltip">
-                            {constraintTooltipText}
-                          </div>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <ConstraintDisplay
+                selected={selected}
+                isColumnFocus={isColumnFocus}
+                feedback={feedback}
+                puzzle={puzzle}
+                getConstraintName={getConstraintName}
+                getConstraintValue={getConstraintValue}
+                getConstraintType={getConstraintType}
+                isConstraintGuessedCorrect={isConstraintGuessedCorrect}
+                constraintTooltipVisible={constraintTooltipVisible}
+                constraintTooltipText={constraintTooltipText}
+                handleConstraintInfoShow={handleConstraintInfoShow}
+                handleConstraintInfoHide={handleConstraintInfoHide}
+              />
             </div>
 
             <div className="numbl-inputs">
-              {keyboardPosition === 'left' ? (
-                <>
-                  <div className="numbl-keyboard-container">
-                    <div className="numbl-keyboard-grid">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                        <button
-                          key={n}
-                          className="numbl-num-btn"
-                          onClick={() => handleNumberInput(String(n))}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      className="numbl-guess-btn"
-                      onClick={handleGuess}
-                      disabled={
-                        pendingGuesses.length === 0 ||
-                        duplicates.size > 0 ||
-                        pendingGuesses.some(guess =>
-                          hasDuplicatesInLine(board, guess.mode, guess.index)
-                        )
-                      }
-                    >
-                      Guess
-                    </button>
-                  </div>
-                  <div className="numbl-inputs-left">
-                    <div className="numbl-timer">
-                      <span className="stat-label">Time</span>
-                      {formatTime(timer)}
-                    </div>
-                    <div
-                      className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
-                    >
-                      <span className="stat-label">Score</span>
-                      {formatScore(currentScore)}
-                    </div>
-                    <button
-                      className="numbl-new-game-btn"
-                      onClick={handleNewRandomGame}
-                    >
-                      New Game
-                    </button>
-                    <div className="numbl-utility-buttons">
-                      <button
-                        className="numbl-settings-btn"
-                        onClick={handleHelpOpen}
-                      >
-                        How to Play
-                      </button>
-                      <button
-                        className="numbl-settings-icon-btn"
-                        onClick={() => setSettingsModalOpen(true)}
-                        aria-label="Settings"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <circle cx="12" cy="6" r="2" fill="currentColor" />
-                          <circle cx="12" cy="12" r="2" fill="currentColor" />
-                          <circle cx="12" cy="18" r="2" fill="currentColor" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="numbl-inputs-left">
-                    <div className="numbl-timer">
-                      <span className="stat-label">Time</span>
-                      {formatTime(timer)}
-                    </div>
-                    <div
-                      className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
-                    >
-                      <span className="stat-label">Score</span>
-                      {formatScore(currentScore)}
-                    </div>
-                    <button
-                      className="numbl-new-game-btn"
-                      onClick={handleNewRandomGame}
-                    >
-                      New Game
-                    </button>
-                    <div className="numbl-utility-buttons">
-                      <button
-                        className="numbl-settings-btn"
-                        onClick={handleHelpOpen}
-                      >
-                        How to Play
-                      </button>
-                      <button
-                        className="numbl-settings-icon-btn"
-                        onClick={() => setSettingsModalOpen(true)}
-                        aria-label="Settings"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <circle cx="12" cy="6" r="2" fill="currentColor" />
-                          <circle cx="12" cy="12" r="2" fill="currentColor" />
-                          <circle cx="12" cy="18" r="2" fill="currentColor" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="numbl-keyboard-container">
-                    <div className="numbl-keyboard-grid">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                        <button
-                          key={n}
-                          className="numbl-num-btn"
-                          onClick={() => handleNumberInput(String(n))}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      className="numbl-guess-btn"
-                      onClick={handleGuess}
-                      disabled={
-                        pendingGuesses.length === 0 ||
-                        duplicates.size > 0 ||
-                        pendingGuesses.some(guess =>
-                          hasDuplicatesInLine(board, guess.mode, guess.index)
-                        )
-                      }
-                    >
-                      Guess
-                    </button>
-                  </div>
-                </>
-              )}
+              <Keyboard
+                keyboardPosition={keyboardPosition}
+                handleNumberInput={handleNumberInput}
+                handleGuess={handleGuess}
+                pendingGuesses={pendingGuesses}
+                duplicates={duplicates}
+                board={board}
+                hasDuplicatesInLine={hasDuplicatesInLine}
+                scoreVibrate={scoreVibrate}
+                currentScore={currentScore}
+                timer={timer}
+                formatTime={formatTime}
+                formatScore={formatScore}
+                handleNewRandomGame={handleNewRandomGame}
+                handleHelpOpen={handleHelpOpen}
+                setSettingsModalOpen={setSettingsModalOpen}
+              />
             </div>
           </div>
         </div>
@@ -1298,272 +1086,34 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {winModalOpen && (
-        <div className="win-modal">
-          <div className="win-modal-content">
-            <h2>numbl finished!</h2>
-            {isNewHighScore && (
-              <div className="high-score-banner">🏆 New High Score! 🏆</div>
-            )}
-            {scoreBreakdown && (
-              <div className="score-breakdown">
-                {(() => {
-                  const baseScore = currentScore;
-                  const totalBonuses =
-                    scoreBreakdown.timeBonus +
-                    scoreBreakdown.firstTimeCorrectBonus +
-                    scoreBreakdown.perfectAccuracyBonus +
-                    scoreBreakdown.efficiencyBonus;
-                  const scoreBeforeMultipliers = baseScore + totalBonuses;
-                  const totalMultiplier =
-                    scoreBreakdown.timeMultiplier *
-                    scoreBreakdown.difficultyMultiplier;
-                  const finalTotalScore = Math.round(
-                    scoreBeforeMultipliers * totalMultiplier
-                  );
+      <WinModal
+        winModalOpen={winModalOpen}
+        isNewHighScore={isNewHighScore}
+        scoreBreakdown={scoreBreakdown}
+        currentScore={currentScore}
+        timer={timer}
+        formatTime={formatTime}
+        formatScore={formatScore}
+        highScore={highScore}
+        handleShareResult={handleShareResult}
+        handleRestartDailyPuzzle={handleRestartDailyPuzzle}
+        setWinModalOpen={setWinModalOpen}
+      />
 
-                  return (
-                    <>
-                      <div className="score-details">
-                        <div className="score-row time-row">
-                          <span>Time:</span>
-                          <span>{formatTime(timer)}</span>
-                        </div>
-                        <div className="score-row">
-                          <span>Base Score:</span>
-                          <span>{formatScore(baseScore)}</span>
-                        </div>
-                        {scoreBreakdown.timeBonus > 0 && (
-                          <div className="score-row">
-                            <span>Time Bonus:</span>
-                            <span>
-                              +{formatScore(scoreBreakdown.timeBonus)}
-                            </span>
-                          </div>
-                        )}
-                        {scoreBreakdown.firstTimeCorrectBonus > 0 && (
-                          <div className="score-row">
-                            <span>First-Time Correct:</span>
-                            <span>
-                              +
-                              {formatScore(
-                                scoreBreakdown.firstTimeCorrectBonus
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        {scoreBreakdown.perfectAccuracyBonus > 0 && (
-                          <div className="score-row">
-                            <span>Perfect Accuracy:</span>
-                            <span>
-                              +
-                              {formatScore(scoreBreakdown.perfectAccuracyBonus)}
-                            </span>
-                          </div>
-                        )}
-                        {scoreBreakdown.efficiencyBonus > 0 && (
-                          <div className="score-row">
-                            <span>Efficiency Bonus:</span>
-                            <span>
-                              +{formatScore(scoreBreakdown.efficiencyBonus)}
-                            </span>
-                          </div>
-                        )}
-                        <div className="score-row multipliers">
-                          <span>Multipliers:</span>
-                          <span>
-                            {scoreBreakdown.difficultyMultiplier > 1.0 ? (
-                              <span className="multiplier">
-                                Difficulty:{' '}
-                                {scoreBreakdown.difficultyMultiplier.toFixed(1)}
-                                x
-                              </span>
-                            ) : (
-                              <span className="multiplier">None</span>
-                            )}
-                          </span>
-                        </div>
-                        <div className="score-row total">
-                          <span>Total Score:</span>
-                          <span>{formatScore(finalTotalScore)}</span>
-                        </div>
-                        <div className="score-row high-score">
-                          <span>High Score:</span>
-                          <span>
-                            {formatScore(
-                              isNewHighScore ? finalTotalScore : highScore
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            )}
-            <div className="win-modal-buttons">
-              <button
-                className="win-modal-btn primary"
-                onClick={handleShareResult}
-              >
-                Share
-              </button>
-              <button
-                className="win-modal-btn secondary"
-                onClick={() => {
-                  setWinModalOpen(false);
-                  handleRestartDailyPuzzle();
-                }}
-              >
-                Play Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SettingsModal
+        settingsModalOpen={settingsModalOpen}
+        keyboardPosition={keyboardPosition}
+        setKeyboardPosition={setKeyboardPosition}
+        setSettingsModalOpen={setSettingsModalOpen}
+      />
 
-      {settingsModalOpen && (
-        <div className="settings-modal">
-          <div className="settings-modal-content">
-            <h2>Settings</h2>
-
-            <div className="settings-section">
-              <h3>Difficulty</h3>
-              <div className="difficulty-toggle">
-                <label className="difficulty-option">
-                  <input
-                    type="radio"
-                    name="difficulty"
-                    value="easy"
-                    checked={false}
-                    disabled
-                  />
-                  <span className="difficulty-label">Easy</span>
-                  <span className="difficulty-description">
-                    Shows arrows for misplaced numbers (Coming Soon)
-                  </span>
-                </label>
-                <label className="difficulty-option">
-                  <input
-                    type="radio"
-                    name="difficulty"
-                    value="hard"
-                    checked={true}
-                    disabled
-                  />
-                  <span className="difficulty-label">Hard</span>
-                  <span className="difficulty-description">
-                    No arrows - pure logic puzzle
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="settings-section">
-              <h3>Keyboard Position</h3>
-              <div className="difficulty-toggle">
-                <label className="difficulty-option">
-                  <input
-                    type="radio"
-                    name="keyboardPosition"
-                    value="left"
-                    checked={keyboardPosition === 'left'}
-                    onChange={e =>
-                      setKeyboardPosition(e.target.value as 'left' | 'right')
-                    }
-                  />
-                  <span className="difficulty-label">Left</span>
-                  <span className="difficulty-description">
-                    Keyboard appears on the left side
-                  </span>
-                </label>
-                <label className="difficulty-option">
-                  <input
-                    type="radio"
-                    name="keyboardPosition"
-                    value="right"
-                    checked={keyboardPosition === 'right'}
-                    onChange={e =>
-                      setKeyboardPosition(e.target.value as 'left' | 'right')
-                    }
-                  />
-                  <span className="difficulty-label">Right</span>
-                  <span className="difficulty-description">
-                    Keyboard appears on the right side
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="settings-version">
-              Version 0.1.0 • Made by{' '}
-              <a
-                href="https://github.com/henryjburg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                @henryjburg
-              </a>
-            </div>
-
-            <div className="settings-modal-buttons">
-              <button
-                className="settings-modal-btn primary"
-                onClick={() => setSettingsModalOpen(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {helpModalOpen && (
-        <div className="settings-modal">
-          <div className="settings-modal-content">
-            <div className="help-header">
-              <h2>How to Play</h2>
-            </div>
-
-            <div className="help-content">{helpPages[helpPage].content}</div>
-
-            <div className="help-pagination">
-              <button
-                className="help-nav-btn"
-                onClick={() => handleHelpPageChange(helpPage - 1)}
-                disabled={helpPage === 0}
-              >
-                ←
-              </button>
-              <div className="help-dots">
-                {helpPages.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`help-dot ${index === helpPage ? 'active' : ''}`}
-                    onClick={() => handleHelpPageChange(index)}
-                  />
-                ))}
-              </div>
-              <button
-                className="help-nav-btn"
-                onClick={() => handleHelpPageChange(helpPage + 1)}
-                disabled={helpPage === helpPages.length - 1}
-              >
-                →
-              </button>
-            </div>
-
-            <div className="settings-modal-buttons">
-              <button
-                className="settings-modal-btn primary"
-                onClick={handleHelpClose}
-              >
-                Got it!
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <HelpModal
+        helpModalOpen={helpModalOpen}
+        helpPage={helpPage}
+        helpPages={helpPages}
+        handleHelpPageChange={handleHelpPageChange}
+        handleHelpClose={handleHelpClose}
+      />
     </div>
   );
 };

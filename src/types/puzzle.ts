@@ -1,9 +1,3 @@
-/**
- * © 2024 Henry Burgess. All rights reserved.
- *
- * Puzzle Types - TypeScript definitions for the game
- */
-
 export interface Constraint {
   sum?: number;
   even?: boolean;
