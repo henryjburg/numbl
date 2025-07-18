@@ -2,23 +2,23 @@ import React, { useState, useEffect } from 'react';
 import '../styles/App.css';
 import { Puzzle, FeedbackType } from '../types/puzzle';
 import {
-  getConstraintText,
+  getConstraintName,
+  getConstraintValue,
   getConstraintType,
-  isConstraintSatisfied,
   isConstraintGuessedCorrect,
   isPuzzleComplete,
   getDuplicates,
   hasDuplicatesInLine,
-  generatePuzzleHash,
-  emptyBoard
+  startingBoardToBoard
 } from '../utils/puzzleUtils';
 import { formatTime } from '../utils/timeUtils';
-import { examplePuzzle } from '../data/examplePuzzle';
+import { puzzleGenerator } from '../utils/puzzleGenerator';
 import { calculateScore, calculateRunningScore, formatScore } from '../utils/scoringUtils';
+
 import { ScoreBreakdown, GameStats } from '../types/puzzle';
 
 const App: React.FC = () => {
-  const [board, setBoard] = useState<string[][]>(emptyBoard());
+  const [board, setBoard] = useState<string[][]>(() => startingBoardToBoard(puzzleGenerator.getTodaysPuzzle().startingBoard));
   const [selected, setSelected] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
   const [feedback, setFeedback] = useState<FeedbackType[][]>(
     Array(4).fill(null).map(() => Array(4).fill('none'))
@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [timer, setTimer] = useState(0);
   const [active, setActive] = useState(true);
   const [pendingGuesses, setPendingGuesses] = useState<Array<{mode: 'row' | 'col', index: number}>>([]);
-  const [puzzle, setPuzzle] = useState<Puzzle>(examplePuzzle);
+  const [puzzle, setPuzzle] = useState<Puzzle>(puzzleGenerator.getTodaysPuzzle());
   const [debugMode, setDebugMode] = useState(false);
   const [winModalOpen, setWinModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -50,15 +50,13 @@ const App: React.FC = () => {
   const lastClickTime = React.useRef(0);
   const pressedKeys = React.useRef<Set<string>>(new Set());
 
-  // Generate hash for current puzzle (for internal use)
-  const currentHash = generatePuzzleHash(puzzle);
-
-  // Get current path as puzzle ID (for display)
-  const currentPath = window.location.pathname || '/';
-  const puzzleId = currentPath === '/' ? 'home' : currentPath.substring(1);
-
   // Track duplicates
   const duplicates = getDuplicates(board);
+
+  // Track pre-filled cells (starting board cells)
+  const isPreFilledCell = (row: number, col: number): boolean => {
+    return puzzle.startingBoard[row][col] !== null;
+  };
 
   // Timer
   useEffect(() => {
@@ -91,25 +89,26 @@ const App: React.FC = () => {
         return;
       }
 
-      // Number input (1-9, 0 for 10, a-f for 11-16)
-      if (/^[1-9a-f]$/.test(key)) {
-        if (selected) {
-          // Don't allow input if the cell is already correct
-          if (feedback[selected.row][selected.col] === 'correct' && board[selected.row][selected.col] === feedbackNumbers[selected.row][selected.col]) {
-            return;
-          }
-          let num = key;
-          if (key === '0') num = '10';
-          else if (key === 'a') num = '11';
-          else if (key === 'b') num = '12';
-          else if (key === 'c') num = '13';
-          else if (key === 'd') num = '14';
-          else if (key === 'e') num = '15';
-          else if (key === 'f') num = '16';
-          handleNumberInput(num);
-        }
-        return;
-      }
+      // Physical keyboard number input disabled - use on-screen number buttons instead
+      // Number input (1-9, 0 for 10, a-f for 11-16) - DISABLED
+      // if (/^[1-9a-f]$/.test(key)) {
+      //   if (selected) {
+      //     // Don't allow input if the cell is already correct
+      //     if (feedback[selected.row][selected.col] === 'correct' && board[selected.row][selected.col] === feedbackNumbers[selected.row][selected.col]) {
+      //       return;
+      //     }
+      //     let num = key;
+      //     if (key === '0') num = '10';
+      //     else if (key === 'a') num = '11';
+      //     else if (key === 'b') num = '12';
+      //     else if (key === 'c') num = '13';
+      //     else if (key === 'd') num = '14';
+      //     else if (key === 'e') num = '15';
+      //     else if (key === 'f') num = '16';
+      //     handleNumberInput(num);
+      //   }
+      //   return;
+      // }
 
       // Backspace/Delete to clear cell and move left
       if ((key === 'Backspace' || key === 'Delete') && selected) {
@@ -122,9 +121,13 @@ const App: React.FC = () => {
         newBoard[row][col] = '';
         setBoard(newBoard);
 
-        // Move to left if available
-        if (col > 0) {
-          setSelected({ row, col: col - 1 });
+        // Move to left if available, skipping pre-filled cells
+        let newCol = col - 1;
+        while (newCol >= 0 && isPreFilledCell(row, newCol)) {
+          newCol--;
+        }
+        if (newCol >= 0) {
+          setSelected({ row, col: newCol });
         }
 
         // Re-check for guessing eligibility since we cleared a cell
@@ -138,26 +141,42 @@ const App: React.FC = () => {
           case 'ArrowLeft':
             if (isColumnFocus) {
               // In column focus, move to previous row in same column
-              if (selected.row > 0) {
-                setSelected({ row: selected.row - 1, col: selected.col });
+              let newRow = selected.row - 1;
+              while (newRow >= 0 && isPreFilledCell(newRow, selected.col)) {
+                newRow--;
+              }
+              if (newRow >= 0) {
+                setSelected({ row: newRow, col: selected.col });
               }
             } else {
               // In row focus, move to previous column in same row
-              if (selected.col > 0) {
-                setSelected({ row: selected.row, col: selected.col - 1 });
+              let newCol = selected.col - 1;
+              while (newCol >= 0 && isPreFilledCell(selected.row, newCol)) {
+                newCol--;
+              }
+              if (newCol >= 0) {
+                setSelected({ row: selected.row, col: newCol });
               }
             }
             break;
           case 'ArrowRight':
             if (isColumnFocus) {
               // In column focus, move to next row in same column
-              if (selected.row < 3) {
-                setSelected({ row: selected.row + 1, col: selected.col });
+              let newRow = selected.row + 1;
+              while (newRow < 4 && isPreFilledCell(newRow, selected.col)) {
+                newRow++;
+              }
+              if (newRow < 4) {
+                setSelected({ row: newRow, col: selected.col });
               }
             } else {
               // In row focus, move to next column in same row
-              if (selected.col < 3) {
-                setSelected({ row: selected.row, col: selected.col + 1 });
+              let newCol = selected.col + 1;
+              while (newCol < 4 && isPreFilledCell(selected.row, newCol)) {
+                newCol++;
+              }
+              if (newCol < 4) {
+                setSelected({ row: selected.row, col: newCol });
               }
             }
             break;
@@ -165,13 +184,21 @@ const App: React.FC = () => {
             e.preventDefault();
             if (isColumnFocus) {
               // In column focus, move to previous row in same column
-              if (selected.row > 0) {
-                setSelected({ row: selected.row - 1, col: selected.col });
+              let newRow = selected.row - 1;
+              while (newRow >= 0 && isPreFilledCell(newRow, selected.col)) {
+                newRow--;
+              }
+              if (newRow >= 0) {
+                setSelected({ row: newRow, col: selected.col });
               }
             } else {
               // In row focus, move to previous row in same column
-              if (selected.row > 0) {
-                setSelected({ row: selected.row - 1, col: selected.col });
+              let newRow = selected.row - 1;
+              while (newRow >= 0 && isPreFilledCell(newRow, selected.col)) {
+                newRow--;
+              }
+              if (newRow >= 0) {
+                setSelected({ row: newRow, col: selected.col });
               }
             }
             break;
@@ -179,13 +206,21 @@ const App: React.FC = () => {
             e.preventDefault();
             if (isColumnFocus) {
               // In column focus, move to next row in same column
-              if (selected.row < 3) {
-                setSelected({ row: selected.row + 1, col: selected.col });
+              let newRow = selected.row + 1;
+              while (newRow < 4 && isPreFilledCell(newRow, selected.col)) {
+                newRow++;
+              }
+              if (newRow < 4) {
+                setSelected({ row: newRow, col: selected.col });
               }
             } else {
               // In row focus, move to next row in same column
-              if (selected.row < 3) {
-                setSelected({ row: selected.row + 1, col: selected.col });
+              let newRow = selected.row + 1;
+              while (newRow < 4 && isPreFilledCell(newRow, selected.col)) {
+                newRow++;
+              }
+              if (newRow < 4) {
+                setSelected({ row: newRow, col: selected.col });
               }
             }
             break;
@@ -287,8 +322,12 @@ const App: React.FC = () => {
   const handleNumberInput = (num: string) => {
     if (!selected) return;
     const { row, col } = selected;
-    // Don't allow changing numbers that are correct
+    // Don't allow changing numbers that are correct or pre-filled
     if (feedback[row][col] === 'correct' && board[row][col] === feedbackNumbers[row][col]) {
+      return;
+    }
+    // Don't allow changing pre-filled cells
+    if (isPreFilledCell(row, col)) {
       return;
     }
     const newBoard = board.map(r => [...r]);
@@ -317,13 +356,21 @@ const App: React.FC = () => {
     // Advance to next cell in current focus direction
     if (isColumnFocus) {
       // In column focus, move to next row in same column
-      if (row < 3) {
-        setSelected({ row: row + 1, col });
+      let newRow = row + 1;
+      while (newRow < 4 && isPreFilledCell(newRow, col)) {
+        newRow++;
+      }
+      if (newRow < 4) {
+        setSelected({ row: newRow, col });
       }
     } else {
       // In row focus, move to next column in same row
-      if (col < 3) {
-        setSelected({ row, col: col + 1 });
+      let newCol = col + 1;
+      while (newCol < 4 && isPreFilledCell(row, newCol)) {
+        newCol++;
+      }
+      if (newCol < 4) {
+        setSelected({ row, col: newCol });
       }
     }
   };
@@ -460,14 +507,17 @@ const App: React.FC = () => {
 
   // Handle new puzzle
   const handleNewPuzzle = () => {
-    setBoard(emptyBoard());
+    // Generate new puzzle for today
+    const newPuzzle = puzzleGenerator.getTodaysPuzzle();
+
+    // Reset game state
+    setBoard(startingBoardToBoard(newPuzzle.startingBoard));
     setFeedback(Array(4).fill(null).map(() => Array(4).fill('none')));
     setFeedbackNumbers(Array(4).fill(null).map(() => Array(4).fill('')));
     setTimer(0);
     setActive(true);
-    setPuzzle(examplePuzzle); // In future, randomize
-    setSelected({ row: 0, col: 0 });
     setPendingGuesses([]);
+    setWinModalOpen(false);
     setShowConfetti(false);
     setGameStats({
       totalGuesses: 0,
@@ -481,12 +531,16 @@ const App: React.FC = () => {
     setCurrentScore(0);
     setGuessedRows(new Set());
     setGuessedCols(new Set());
+    setSelected({ row: 0, col: 0 });
     setIsColumnFocus(false);
+
+    // Set the new puzzle
+    setPuzzle(newPuzzle);
   };
 
   // Handle sharing result
   const handleShareResult = () => {
-    const shareText = `I finished numbl ${puzzleId} in ${formatTime(timer)}!\n\nTry and beat me: https://numbl.net`;
+    const shareText = `I finished today's numbl in ${formatTime(timer)}!\n\nTry and beat me: https://numbl.net`;
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareText).catch(err => {
@@ -512,8 +566,8 @@ const App: React.FC = () => {
 
   // Handle cell selection
   const handleCellClick = (row: number, col: number) => {
-    // Prevent selecting cells that are already correct
-    if (feedback[row][col] === 'correct') {
+    // Prevent selecting cells that are already correct or pre-filled
+    if (feedback[row][col] === 'correct' || isPreFilledCell(row, col)) {
       return;
     }
 
@@ -568,9 +622,16 @@ const App: React.FC = () => {
               <h3>Row {selected.row + 1}</h3>
               <div className="numbl-constraints-list">
                 <div className="numbl-constraint-item">
-                  <span className={`numbl-constraint-text constraint-${getConstraintType(puzzle.rowConstraints[selected.row])} ${isConstraintGuessedCorrect(feedback, 'row', selected.row) ? 'guessed-correct' : ''}`}>
-                    {getConstraintText(puzzle.rowConstraints[selected.row])}
-                  </span>
+                  <div className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, 'row', selected.row) ? 'guessed-correct' : ''}`}>
+                    <span className="numbl-constraint-name">
+                      {getConstraintName(puzzle.rowConstraints[selected.row])}
+                    </span>
+                    {getConstraintValue(puzzle.rowConstraints[selected.row]) && (
+                      <span className={`numbl-constraint-value constraint-${getConstraintType(puzzle.rowConstraints[selected.row])}`}>
+                        {getConstraintValue(puzzle.rowConstraints[selected.row])}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -578,9 +639,16 @@ const App: React.FC = () => {
               <h3>Column {selected.col + 1}</h3>
               <div className="numbl-constraints-list">
                 <div className="numbl-constraint-item">
-                  <span className={`numbl-constraint-text constraint-${getConstraintType(puzzle.colConstraints[selected.col])} ${isConstraintGuessedCorrect(feedback, 'col', selected.col) ? 'guessed-correct' : ''}`}>
-                    {getConstraintText(puzzle.colConstraints[selected.col])}
-                  </span>
+                  <div className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, 'col', selected.col) ? 'guessed-correct' : ''}`}>
+                    <span className="numbl-constraint-name">
+                      {getConstraintName(puzzle.colConstraints[selected.col])}
+                    </span>
+                    {getConstraintValue(puzzle.colConstraints[selected.col]) && (
+                      <span className={`numbl-constraint-value constraint-${getConstraintType(puzzle.colConstraints[selected.col])}`}>
+                        {getConstraintValue(puzzle.colConstraints[selected.col])}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -595,7 +663,7 @@ const App: React.FC = () => {
                 {row.map((cell, cIdx) => (
                   <td
                     key={cIdx}
-                    className={`numbl-cell${selected && selected.row === rIdx && selected.col === cIdx ? ' selected' : ''} ${feedback[rIdx][cIdx] !== 'none' ? `feedback-${feedback[rIdx][cIdx]}` : ''} ${duplicates.has(`${rIdx},${cIdx}`) ? 'duplicate' : ''} ${feedback[rIdx][cIdx] === 'correct' ? 'locked' : ''} ${selected && ((!isColumnFocus && rIdx === selected.row) || (isColumnFocus && cIdx === selected.col)) ? 'focus-highlight' : ''}`}
+                    className={`numbl-cell${selected && selected.row === rIdx && selected.col === cIdx ? ' selected' : ''} ${feedback[rIdx][cIdx] !== 'none' ? `feedback-${feedback[rIdx][cIdx]}` : ''} ${duplicates.has(`${rIdx},${cIdx}`) ? 'duplicate' : ''} ${feedback[rIdx][cIdx] === 'correct' ? 'locked' : ''} ${isPreFilledCell(rIdx, cIdx) ? 'pre-filled' : ''} ${selected && ((!isColumnFocus && rIdx === selected.row) || (isColumnFocus && cIdx === selected.col)) && !isPreFilledCell(rIdx, cIdx) ? 'focus-highlight' : ''}`}
                     onClick={() => handleCellClick(rIdx, cIdx)}
                     // Only apply background via CSS classes now
                   >
@@ -607,12 +675,12 @@ const App: React.FC = () => {
           </tbody>
         </table>
         <div className="numbl-puzzle-id">
-          Puzzle: {puzzleId}
+          Today's Puzzle
         </div>
       </div>
       <div className="numbl-inputs">
         {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].map(n => {
-                    // Check if this number is correctly placed anywhere in the puzzle
+          // Check if this number is correctly placed anywhere in the puzzle
           const isNumberCorrectlyPlaced = feedback.some((row, rowIndex) =>
             row.some((cellFeedback, colIndex) =>
               cellFeedback === 'correct' &&
@@ -621,12 +689,22 @@ const App: React.FC = () => {
             )
           );
 
+          // Check if this number is used in any pre-filled cell
+          const isNumberUsedInPreFilledCell = board.some((row, rowIndex) =>
+            row.some((cell, colIndex) =>
+              cell === String(n) && isPreFilledCell(rowIndex, colIndex)
+            )
+          );
+
+          // Check if selected cell is pre-filled
+          const isSelectedCellPreFilled = selected && isPreFilledCell(selected.row, selected.col);
+
           return (
             <button
               key={n}
               className="numbl-num-btn"
               onClick={() => handleNumberInput(String(n))}
-              disabled={!selected || isNumberCorrectlyPlaced}
+              disabled={!selected || isNumberCorrectlyPlaced || isNumberUsedInPreFilledCell || isSelectedCellPreFilled}
             >
               {n}
             </button>
@@ -666,7 +744,7 @@ const App: React.FC = () => {
           <div className="win-modal-content">
             <h2>numbl finished!</h2>
             <div className="time-display">{formatTime(timer)}</div>
-            <div className="puzzle-id">Puzzle: {puzzleId}</div>
+            <div className="puzzle-id">Today's Puzzle</div>
             {scoreBreakdown && (
               <div className="score-breakdown">
                 <h3>Final Score: {formatScore(scoreBreakdown.totalScore)}</h3>

@@ -1,45 +1,133 @@
 import { Constraint, Puzzle, FeedbackType } from '../types/puzzle';
 
-export const getConstraintText = (constraint: Constraint) => {
-  if (constraint.sum) return `${constraint.sum}`;
-  if (constraint.onlyOdd) return 'Odd';
-  if (constraint.onlyEven) return 'Even';
+export const getConstraintName = (constraint: Constraint): string => {
+  if (constraint.sum) return 'Sum';
+  if (constraint.onlyOdd) return 'Odds';
+  if (constraint.onlyEven) return 'Evens';
+  if (constraint.range) return 'Range';
+  if (constraint.contains) return 'Contains';
+  if (constraint.order) return 'Order';
+  if (constraint.consecutive) return 'Consecutive';
+  if (constraint.fibonacci) return 'Fibonacci';
+  if (constraint.prime) return 'Prime';
+  if (constraint.square) return 'Square';
   if (constraint.unique) return 'Unique';
   return '';
 };
 
-export const getConstraintType = (constraint: Constraint): 'sum' | 'odd' | 'even' | 'unique' => {
+export const getConstraintValue = (constraint: Constraint): string => {
+  if (constraint.sum) return constraint.sum.toString();
+  if (constraint.onlyOdd) return 'Odd';
+  if (constraint.onlyEven) return 'Even';
+  if (constraint.range) {
+    if (constraint.range.min !== undefined && constraint.range.max !== undefined) {
+      return `${constraint.range.min}-${constraint.range.max}`;
+    } else if (constraint.range.min !== undefined) {
+      return `≥${constraint.range.min}`;
+    } else if (constraint.range.max !== undefined) {
+      return `≤${constraint.range.max}`;
+    }
+  }
+  if (constraint.contains) return constraint.contains.toString();
+  if (constraint.order) return constraint.order === 'increasing' ? 'Low → High' : 'High → Low';
+  if (constraint.consecutive) return '';
+  if (constraint.fibonacci) return '';
+  if (constraint.prime) return '';
+  if (constraint.square) return '';
+  if (constraint.unique) return '';
+  return '';
+};
+
+export const getConstraintType = (constraint: Constraint): 'sum' | 'odd' | 'even' | 'range' | 'contains' | 'order' | 'consecutive' | 'fibonacci' | 'prime' | 'square' | 'unique' => {
   if (constraint.sum) return 'sum';
   if (constraint.onlyOdd) return 'odd';
   if (constraint.onlyEven) return 'even';
+  if (constraint.range) return 'range';
+  if (constraint.contains) return 'contains';
+  if (constraint.order) return 'order';
+  if (constraint.consecutive) return 'consecutive';
+  if (constraint.fibonacci) return 'fibonacci';
+  if (constraint.prime) return 'prime';
+  if (constraint.square) return 'square';
   if (constraint.unique) return 'unique';
   return 'sum'; // fallback
 };
 
 // Check if a constraint is satisfied
 export const isConstraintSatisfied = (puzzle: Puzzle, board: string[][], constraint: Constraint, lineType: 'row' | 'col', index: number): boolean => {
+  const line = lineType === 'row' ? board[index] : board.map(row => row[index]);
+  const numbers = line.map(cell => Number(cell)).filter(num => !isNaN(num));
+
+  if (numbers.length !== 4) return false;
+
   if (constraint.sum) {
-    const line = lineType === 'row' ? board[index] : board.map(row => row[index]);
-    const numbers = line.map(cell => Number(cell)).filter(num => !isNaN(num));
-    return numbers.length === 4 && numbers.reduce((sum, num) => sum + num, 0) === constraint.sum;
+    return numbers.reduce((sum, num) => sum + num, 0) === constraint.sum;
   }
 
-  if (constraint.onlyOdd || constraint.onlyEven) {
-    const line = lineType === 'row' ? board[index] : board.map(row => row[index]);
-    const numbers = line.map(cell => Number(cell)).filter(num => !isNaN(num));
-    if (numbers.length !== 4) return false;
+  if (constraint.onlyOdd) {
+    return numbers.every(num => num % 2 === 1);
+  }
 
-    if (constraint.onlyOdd) {
-      return numbers.every(num => num % 2 === 1);
+  if (constraint.onlyEven) {
+    return numbers.every(num => num % 2 === 0);
+  }
+
+  if (constraint.range) {
+    const range = constraint.range;
+    if (range.min !== undefined && numbers.some(num => num < (range.min as number))) {
+      return false;
+    }
+    if (range.max !== undefined && numbers.some(num => num > (range.max as number))) {
+      return false;
+    }
+    return true;
+  }
+
+  if (constraint.contains) {
+    return numbers.includes(constraint.contains);
+  }
+
+  if (constraint.order) {
+    if (constraint.order === 'increasing') {
+      return numbers.every((num, i) => i === 0 || num > numbers[i - 1]);
     } else {
-      return numbers.every(num => num % 2 === 0);
+      return numbers.every((num, i) => i === 0 || num < numbers[i - 1]);
     }
   }
 
+  if (constraint.consecutive) {
+    const sorted = [...numbers].sort((a, b) => a - b);
+    for (let i = 0; i < sorted.length - 1; i++) {
+      if (sorted[i + 1] - sorted[i] === 1) return true;
+    }
+    return false;
+  }
+
+  if (constraint.fibonacci) {
+    const fibs = [1, 2, 3, 5, 8, 13];
+    return numbers.some(n => fibs.includes(n));
+  }
+
+  if (constraint.prime) {
+    const isPrime = (num: number) => {
+      if (num < 2) return false;
+      for (let i = 2; i <= Math.sqrt(num); i++) {
+        if (num % i === 0) return false;
+      }
+      return true;
+    };
+    return numbers.some(n => isPrime(n));
+  }
+
+  if (constraint.square) {
+    return numbers.some(n => {
+      const sqrt = Math.sqrt(n);
+      return sqrt === Math.floor(sqrt);
+    });
+  }
+
   if (constraint.unique) {
-    const line = lineType === 'row' ? board[index] : board.map(row => row[index]);
-    const numbers = line.filter(cell => cell !== '');
-    return numbers.length === 4 && new Set(numbers).size === 4;
+    return new Set(numbers).size === 4;
   }
 
   return false;
@@ -150,3 +238,9 @@ export const generatePuzzleHash = (puzzle: Puzzle): string => {
 };
 
 export const emptyBoard = () => Array(4).fill(null).map(() => Array(4).fill(''));
+
+export const startingBoardToBoard = (startingBoard: (number | null)[][]): string[][] => {
+  return startingBoard.map(row =>
+    row.map(cell => cell !== null ? cell.toString() : '')
+  );
+};

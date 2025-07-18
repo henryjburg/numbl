@@ -110,7 +110,6 @@ src/
 ├── styles/        # CSS files
 ├── types/         # TypeScript definitions
 ├── utils/         # Game logic utilities
-├── data/          # Puzzle data
 └── tests/         # Test files
 ```
 
