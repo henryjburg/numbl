@@ -15,9 +15,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/henryburgess/numbl.git"
+    "url": "https://github.com/henryjburg/numbl.git"
   },
-  "homepage": "https://henryburgess.github.io/numbl",
+  "homepage": "https://henryjburg.github.io/numbl",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

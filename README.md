@@ -1,57 +1,54 @@
 # numbl 🧮
 
-A challenging number puzzle game where you fill a 4x4 grid to match row and column constraints. Think Wordle, but with numbers and constraints!
+A daily number puzzle game where you fill a 4x4 grid to match mathematical constraints. Think Wordle, but a Sudoku influence!
 
 ## 🎮 How to Play
 
-**Goal**: Fill the 4x4 grid with numbers 1-9 so that each row and column satisfies its specific constraint.
+**Goal**: Fill the 4x4 grid with numbers 1-9 so each row and column satisfies its constraint.
 
-### Basic Rules
+### Rules
 
-1. **Fill the grid** with numbers 1-9 (no zeros!)
-2. **Match the constraints** shown for each row and column
-3. **Guess when ready** - press Enter or click "Guess" when a row/column is filled
-4. **Get feedback** - see which numbers are correct, misplaced, or wrong
-5. **Complete the puzzle** - solve all constraints to win!
+- Use numbers 1-9 only (no zeros)
+- Numbers can repeat across the grid, but not in the same row/column
+- Some cells are pre-filled and can't be changed
+- Complete rows/columns to check your answers
 
 ### Constraint Types
 
-- **Sum Constraints**: Numbers must add up to the target value
-- **Odd/Even Constraints**: All numbers must be odd or even
-- **Contains Constraints**: Must contain specific numbers
-- **Range Constraints**: All numbers must be within a specific range
+- **Sum**: Numbers must add up to target value
+- **Odd/Even**: All numbers must be odd or even
+- **Contains**: Must include specific numbers
+- **Range**: All numbers within min/max range
 
 ### Controls
 
-- **Mouse**: Click cells to select, click number buttons to fill
+- **Mouse**: Click cells to select, number buttons to fill
 - **Keyboard**: Arrow keys to navigate, number keys to fill, Enter to guess
 
 ## 🚀 Quick Start
 
 ### Play Online
 
-Visit: [https://henryburgess.github.io/numbl](https://henryburgess.github.io/numbl)
+[https://henryjburg.github.io/numbl](https://henryjburg.github.io/numbl)
 
 ### Run Locally
 
 ```bash
-git clone https://github.com/henryburgess/numbl.git
+git clone https://github.com/henryjburg/numbl.git
 cd numbl
 npm install
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and start playing!
+## 🎯 Features
 
-## 🎯 Game Features
-
-- Beautiful, responsive UI
-- Keyboard and mouse controls
+- Daily puzzles with unique constraints
 - Color-coded feedback system
-- Timer tracking
-- Share results with friends
-- Confetti celebration on win!
+- Timer and scoring
+- Share results
+- Responsive design
+- Keyboard shortcuts
 
 ---
 
-© 2025 Henry Burgess. All rights reserved.
+© 2025 Henry Burgess
