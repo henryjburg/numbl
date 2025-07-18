@@ -5,7 +5,7 @@
  * This file contains the main application component.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/App.css';
 import { Puzzle, FeedbackType } from '../types/puzzle';
 import {
@@ -263,10 +263,40 @@ const App: React.FC = () => {
     isColumnFocus,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const checkForGuessingEligibility = useCallback(
+    (currentBoard: string[][], currentFeedback?: FeedbackType[][]) => {
+      const feedbackToUse = currentFeedback || feedback;
+      const newPendingGuesses: Array<{ mode: 'row' | 'col'; index: number }> =
+        [];
+
+      for (let row = 0; row < 4; row++) {
+        if (
+          currentBoard[row].every(cell => cell) &&
+          !isConstraintGuessedCorrect(feedbackToUse, 'row', row) &&
+          !guessedRows.has(row)
+        ) {
+          newPendingGuesses.push({ mode: 'row', index: row });
+        }
+      }
+
+      for (let col = 0; col < 4; col++) {
+        if (
+          currentBoard.every(r => r[col]) &&
+          !isConstraintGuessedCorrect(feedbackToUse, 'col', col) &&
+          !guessedCols.has(col)
+        ) {
+          newPendingGuesses.push({ mode: 'col', index: col });
+        }
+      }
+
+      setPendingGuesses(newPendingGuesses);
+    },
+    [feedback, guessedRows, guessedCols]
+  );
+
   useEffect(() => {
     checkForGuessingEligibility(board);
-  }, [board, feedback]);
+  }, [board, checkForGuessingEligibility]);
 
   useEffect(() => {
     if (active) {
@@ -307,36 +337,6 @@ const App: React.FC = () => {
       setTimeout(() => setShowConfetti(false), 3000);
     }
   }, [feedback, active, gameStats, timer, puzzle, highScore]);
-
-  const checkForGuessingEligibility = (
-    currentBoard: string[][],
-    currentFeedback?: FeedbackType[][]
-  ) => {
-    const feedbackToUse = currentFeedback || feedback;
-    const newPendingGuesses: Array<{ mode: 'row' | 'col'; index: number }> = [];
-
-    for (let row = 0; row < 4; row++) {
-      if (
-        currentBoard[row].every(cell => cell) &&
-        !isConstraintGuessedCorrect(feedbackToUse, 'row', row) &&
-        !guessedRows.has(row)
-      ) {
-        newPendingGuesses.push({ mode: 'row', index: row });
-      }
-    }
-
-    for (let col = 0; col < 4; col++) {
-      if (
-        currentBoard.every(r => r[col]) &&
-        !isConstraintGuessedCorrect(feedbackToUse, 'col', col) &&
-        !guessedCols.has(col)
-      ) {
-        newPendingGuesses.push({ mode: 'col', index: col });
-      }
-    }
-
-    setPendingGuesses(newPendingGuesses);
-  };
 
   const handleNumberInput = (num: string) => {
     if (!selected) return;
