@@ -285,21 +285,82 @@ body,
   gap: 0.5rem;
 }
 
-.numbl-constraint-name {
-  font-size: 0.8rem;
-  font-weight: 600;
+.numbl-constraint-info-btn {
+  background: none;
+  border: none;
   color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0.3rem;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.2rem;
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+.numbl-constraint-info-btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.numbl-constraint-info-btn:hover {
+  background: rgba(139, 115, 85, 0.08);
+  color: var(--primary-color);
+  opacity: 1;
+  border-radius: 0.3rem;
+}
+
+.numbl-constraint-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.numbl-constraint-tooltip {
+  position: absolute;
+  background: var(--text-primary);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 120px;
+  max-width: 1000px;
+  z-index: 1001;
+  box-shadow: var(--shadow-medium);
+  pointer-events: none;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.4;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.numbl-constraint-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .numbl-constraint-value {
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.2rem 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
   border-radius: 0.3rem;
   background: #f8f9fa;
-  color: var(--text-secondary);
+  color: var(--primary-color);
 }
 
 .numbl-constraint-display.guessed-correct .numbl-constraint-value {
@@ -698,11 +759,15 @@ body,
 
 /* Settings specific styles */
 .settings-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
 }
 
 .settings-section h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -787,4 +852,243 @@ body,
 .numbl-credits a:hover {
   color: #7a6b4a;
   text-decoration: underline;
+}
+
+/* Help Modal Styles */
+.help-text {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.help-rules,
+.help-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.help-rule,
+.help-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  line-height: 1.5;
+}
+
+.help-rule-number,
+.help-step-number {
+  background: var(--primary-color);
+  color: white;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.help-rule-text,
+.help-step-text {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.help-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.help-feedback-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.help-feedback-color {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  border: 2px solid #c4b393;
+  flex-shrink: 0;
+}
+
+.help-feedback-color.correct {
+  background: #b5ead7;
+}
+
+.help-feedback-color.misplaced {
+  background: repeating-linear-gradient(
+    45deg,
+    #ffe082,
+    #ffe082 2px,
+    #fff3cd 2px,
+    #fff3cd 4px
+  );
+}
+
+.help-feedback-color.wrong {
+  background: #e0e0e0;
+}
+
+.help-feedback-color.duplicate {
+  background: #ffcdd2;
+}
+
+.help-feedback-text {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Help Modal Pagination Styles */
+.help-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.help-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.help-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.help-nav-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-light);
+}
+
+.help-nav-btn:hover:not(:disabled) {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.help-nav-btn:disabled {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.help-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.help-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-dot:hover {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}
+
+.help-dot.active {
+  background: var(--primary-color);
+  transform: scale(1.2);
+}
+
+.help-content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 50vh;
+  padding-right: 0.5rem;
+}
+
+.help-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.help-content::-webkit-scrollbar-track {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.help-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+.help-content::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+/* Additional Help Content Styles */
+.help-tips,
+.help-scoring,
+.help-strategy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.help-tip,
+.help-scoring-item,
+.help-strategy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  line-height: 1.5;
+}
+
+.help-tip-icon,
+.help-scoring-icon,
+.help-strategy-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.help-tip-text,
+.help-scoring-text,
+.help-strategy-text {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
 }

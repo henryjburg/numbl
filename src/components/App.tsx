@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/App.css';
-import { Puzzle, FeedbackType } from '../types/puzzle';
+import { Puzzle, FeedbackType, Constraint } from '../types/puzzle';
 import {
   getConstraintName,
   getConstraintValue,
@@ -65,7 +65,174 @@ const App: React.FC = () => {
   const [debugMode, setDebugMode] = useState(false);
   const [winModalOpen, setWinModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [helpPage, setHelpPage] = useState(0);
   const [difficulty] = useState<'easy' | 'hard'>('hard');
+
+  // Check if this is the user's first visit
+  const [hasSeenHelp, setHasSeenHelp] = useState<boolean>(() => {
+    const saved = localStorage.getItem('numbl-has-seen-help');
+    return saved === 'true';
+  });
+
+  // Constraint tooltip state
+  const [constraintTooltipVisible, setConstraintTooltipVisible] =
+    useState(false);
+  const [constraintTooltipText, setConstraintTooltipText] = useState('');
+  const [constraintTooltipPosition, setConstraintTooltipPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+
+  const helpPages = [
+    {
+      title: 'Welcome to Numbl!',
+      content: (
+        <div className="settings-section">
+          <h3>🎯 The Goal</h3>
+          <p className="help-text">
+            Fill in the 4x4 grid with numbers 1-9 so that each row and column
+            satisfies its mathematical constraint. Each day brings a new puzzle
+            to solve!
+          </p>
+          <div className="help-rules">
+            <div className="help-rule">
+              <span className="help-rule-number">1.</span>
+              <span className="help-rule-text">
+                Use numbers 1-9 only (no zeros!)
+              </span>
+            </div>
+            <div className="help-rule">
+              <span className="help-rule-number">2.</span>
+              <span className="help-rule-text">
+                Numbers can appear multiple times, but not in the same row or
+                column (like Sudoku)
+              </span>
+            </div>
+            <div className="help-rule">
+              <span className="help-rule-number">3.</span>
+              <span className="help-rule-text">
+                Some cells are pre-filled and can't be changed
+              </span>
+            </div>
+            <div className="help-rule">
+              <span className="help-rule-number">4.</span>
+              <span className="help-rule-text">
+                Complete rows and columns to check your answers
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'How to Play',
+      content: (
+        <div className="settings-section">
+          <h3>🎮 Gameplay Steps</h3>
+          <div className="help-steps">
+            <div className="help-step">
+              <span className="help-step-number">1.</span>
+              <span className="help-step-text">
+                Click on any empty cell to select it
+              </span>
+            </div>
+            <div className="help-step">
+              <span className="help-step-number">2.</span>
+              <span className="help-step-text">
+                Type a number (1-9) or use the number buttons
+              </span>
+            </div>
+            <div className="help-step">
+              <span className="help-step-number">3.</span>
+              <span className="help-step-text">
+                When a row or column is full, click "Guess" to check it
+              </span>
+            </div>
+            <div className="help-step">
+              <span className="help-step-number">4.</span>
+              <span className="help-step-text">
+                Tap cells or use the arrow keys to navigate between cells
+              </span>
+            </div>
+            <div className="help-step">
+              <span className="help-step-number">5.</span>
+              <span className="help-step-text">
+                Click the cell or press Space to switch between row and column
+                focus
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Understanding Feedback',
+      content: (
+        <div className="settings-section">
+          <h3>🎨 Guess Feedback</h3>
+          <div className="help-feedback">
+            <div className="help-feedback-item">
+              <div className="help-feedback-color correct"></div>
+              <span className="help-feedback-text">
+                Green = Correct number in correct position
+              </span>
+            </div>
+            <div className="help-feedback-item">
+              <div className="help-feedback-color misplaced"></div>
+              <span className="help-feedback-text">
+                Yellow = Correct number in wrong position, either in that row or
+                column
+              </span>
+            </div>
+            <div className="help-feedback-item">
+              <div className="help-feedback-color wrong"></div>
+              <span className="help-feedback-text">Gray = Wrong number</span>
+            </div>
+            <div className="help-feedback-item">
+              <div className="help-feedback-color duplicate"></div>
+              <span className="help-feedback-text">
+                Red = Duplicate in row or column
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Scoring & Strategy',
+      content: (
+        <div className="settings-section">
+          <h3>🏆 Scoring System</h3>
+          <p className="help-text">
+            Score points for correct guesses, with bonuses for speed, accuracy,
+            and efficiency. Try to beat your high score!
+          </p>
+          <div className="help-scoring">
+            <div className="help-scoring-item">
+              <span className="help-scoring-icon">⚡</span>
+              <span className="help-scoring-text">
+                Time Bonus: Faster completion = more points
+              </span>
+            </div>
+            <div className="help-scoring-item">
+              <span className="help-scoring-icon">🎯</span>
+              <span className="help-scoring-text">
+                Accuracy Bonus: Fewer wrong guesses = bonus points
+              </span>
+            </div>
+            <div className="help-scoring-item">
+              <span className="help-scoring-icon">🚀</span>
+              <span className="help-scoring-text">
+                Efficiency Bonus: First-time correct rows/columns
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
   const [keyboardPosition, setKeyboardPosition] = useState<'left' | 'right'>(
     () => {
       const saved = localStorage.getItem('numbl-keyboard-position');
@@ -86,6 +253,15 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('numbl-keyboard-position', keyboardPosition);
   }, [keyboardPosition]);
+
+  // Show help modal on first visit
+  useEffect(() => {
+    if (!hasSeenHelp) {
+      setHelpModalOpen(true);
+      setHasSeenHelp(true);
+      localStorage.setItem('numbl-has-seen-help', 'true');
+    }
+  }, [hasSeenHelp]);
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -683,6 +859,66 @@ const App: React.FC = () => {
     checkForGuessingEligibility(board);
   };
 
+  const handleHelpOpen = () => {
+    setHelpPage(0);
+    setHelpModalOpen(true);
+  };
+
+  const handleHelpClose = () => {
+    setHelpModalOpen(false);
+    setHelpPage(0);
+  };
+
+  const handleHelpPageChange = (newPage: number) => {
+    setHelpPage(newPage);
+  };
+
+  const generateConstraintDescription = (
+    constraint: Constraint,
+    lineType: 'row' | 'col'
+  ): string => {
+    const lineText = lineType === 'row' ? 'row' : 'column';
+
+    if (constraint.sum) {
+      return `Sum of numbers\nin this ${lineText}: ${constraint.sum}`;
+    }
+
+    if (constraint.even === true) {
+      return `All numbers in this ${lineText}\nmust be even`;
+    }
+
+    if (constraint.even === false) {
+      return `All numbers in this ${lineText}\nmust be odd`;
+    }
+
+    if (constraint.contains) {
+      const numbers = constraint.contains.sort((a, b) => a - b).join(', ');
+      return `Must contain:\n${numbers}`;
+    }
+
+    if (constraint.range) {
+      return `Numbers between\n${constraint.range.min} and ${constraint.range.max}`;
+    }
+
+    return '';
+  };
+
+  const handleConstraintInfoShow = (
+    event: React.MouseEvent,
+    constraint: Constraint,
+    lineType: 'row' | 'col'
+  ) => {
+    const description = generateConstraintDescription(constraint, lineType);
+    if (description) {
+      setConstraintTooltipText(description);
+      setConstraintTooltipVisible(true);
+    }
+  };
+
+  const handleConstraintInfoHide = () => {
+    setConstraintTooltipVisible(false);
+  };
+
   return (
     <div className="numbl-root">
       <div className="numbl-header">
@@ -733,33 +969,91 @@ const App: React.FC = () => {
               <div
                 className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, isColumnFocus ? 'col' : 'row', isColumnFocus ? selected.col : selected.row) ? 'guessed-correct' : ''}`}
               >
-                <span className="numbl-constraint-name">
-                  {getConstraintName(
-                    isColumnFocus
-                      ? puzzle.colConstraints[selected.col]
-                      : puzzle.rowConstraints[selected.row]
-                  )}
-                </span>
-                {getConstraintValue(
-                  isColumnFocus
-                    ? puzzle.colConstraints[selected.col]
-                    : puzzle.rowConstraints[selected.row]
-                ) && (
-                  <span
-                    className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
-                  >
-                    {getConstraintValue(
+                <div className="numbl-constraint-content">
+                  <span className="numbl-constraint-name">
+                    {getConstraintName(
                       isColumnFocus
                         ? puzzle.colConstraints[selected.col]
                         : puzzle.rowConstraints[selected.row]
                     )}
                   </span>
-                )}
+                  {getConstraintValue(
+                    isColumnFocus
+                      ? puzzle.colConstraints[selected.col]
+                      : puzzle.rowConstraints[selected.row]
+                  ) && (
+                    <span
+                      className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
+                    >
+                      {getConstraintValue(
+                        isColumnFocus
+                          ? puzzle.colConstraints[selected.col]
+                          : puzzle.rowConstraints[selected.row]
+                      )}
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="numbl-constraint-info-btn"
+                  onMouseEnter={e =>
+                    handleConstraintInfoShow(
+                      e,
+                      isColumnFocus
+                        ? puzzle.colConstraints[selected.col]
+                        : puzzle.rowConstraints[selected.row],
+                      isColumnFocus ? 'col' : 'row'
+                    )
+                  }
+                  onMouseLeave={handleConstraintInfoHide}
+                  onClick={e =>
+                    handleConstraintInfoShow(
+                      e,
+                      isColumnFocus
+                        ? puzzle.colConstraints[selected.col]
+                        : puzzle.rowConstraints[selected.row],
+                      isColumnFocus ? 'col' : 'row'
+                    )
+                  }
+                  aria-label="Constraint information"
+                >
+                  {/* SVG info icon */}
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="8"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      fill="none"
+                    />
+                    <rect
+                      x="9"
+                      y="8"
+                      width="2"
+                      height="6"
+                      rx="1"
+                      fill="currentColor"
+                    />
+                    <circle cx="10" cy="6" r="1.2" fill="currentColor" />
+                  </svg>
+                  {constraintTooltipVisible && (
+                    <div className="numbl-constraint-tooltip">
+                      {constraintTooltipText}
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
           </div>
         )}
       </div>
+
       <div className="numbl-inputs">
         {keyboardPosition === 'left' ? (
           <>
@@ -804,6 +1098,12 @@ const App: React.FC = () => {
               >
                 Settings
               </button>
+              <button
+                className="numbl-settings-btn"
+                onClick={() => setHelpModalOpen(true)}
+              >
+                How to Play
+              </button>
             </div>
           </>
         ) : (
@@ -822,6 +1122,9 @@ const App: React.FC = () => {
                 onClick={() => setSettingsModalOpen(true)}
               >
                 Settings
+              </button>
+              <button className="numbl-settings-btn" onClick={handleHelpOpen}>
+                How to Play
               </button>
             </div>
             <div className="numbl-keyboard-container">
@@ -1084,6 +1387,53 @@ const App: React.FC = () => {
                 onClick={() => setSettingsModalOpen(false)}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {helpModalOpen && (
+        <div className="settings-modal">
+          <div className="settings-modal-content">
+            <div className="help-header">
+              <h2>How to Play</h2>
+            </div>
+
+            <div className="help-content">{helpPages[helpPage].content}</div>
+
+            <div className="help-pagination">
+              <button
+                className="help-nav-btn"
+                onClick={() => handleHelpPageChange(helpPage - 1)}
+                disabled={helpPage === 0}
+              >
+                ←
+              </button>
+              <div className="help-dots">
+                {helpPages.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`help-dot ${index === helpPage ? 'active' : ''}`}
+                    onClick={() => handleHelpPageChange(index)}
+                  />
+                ))}
+              </div>
+              <button
+                className="help-nav-btn"
+                onClick={() => handleHelpPageChange(helpPage + 1)}
+                disabled={helpPage === helpPages.length - 1}
+              >
+                →
+              </button>
+            </div>
+
+            <div className="settings-modal-buttons">
+              <button
+                className="settings-modal-btn primary"
+                onClick={handleHelpClose}
+              >
+                Got it!
               </button>
             </div>
           </div>
