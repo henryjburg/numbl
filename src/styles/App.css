@@ -5,8 +5,10 @@ body, .numbl-root {
   background: #f8f8fa;
   margin: 0;
   min-height: 100vh;
+  max-height: 100vh;
   color: #222;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .numbl-root {
@@ -16,7 +18,7 @@ body, .numbl-root {
   justify-content: flex-start;
   min-height: 100vh;
   max-height: 100vh;
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vh, 1rem);
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -26,24 +28,24 @@ body, .numbl-root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
   flex-shrink: 0;
   width: 100%;
-  max-width: 19.5rem;
+  max-width: min(19.5rem, 90vw);
   margin-left: auto;
   margin-right: auto;
 }
 
 .numbl-header h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 6vh, 2.5rem);
   letter-spacing: 0.1em;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 clamp(0.25rem, 1vh, 0.5rem) 0;
   font-weight: 700;
   color: #222;
 }
 
 .numbl-timer {
-  font-size: 1.2rem;
+  font-size: clamp(0.9rem, 3vh, 1.2rem);
   color: #6c757d;
   font-family: 'Courier New', monospace;
   font-weight: 600;
@@ -52,12 +54,12 @@ body, .numbl-root {
 .numbl-new-btn {
   background: #6c5ce7;
   border: none;
-  border-radius: 1rem;
-  padding: 1rem;
-  font-size: 1.2rem;
+  border-radius: clamp(0.5rem, 2vh, 1rem);
+  padding: clamp(0.5rem, 2vh, 1rem);
+  font-size: clamp(0.9rem, 3vh, 1.2rem);
   font-weight: 700;
   color: white;
-  margin-top: 0.5rem;
+  margin-top: clamp(0.25rem, 1vh, 0.5rem);
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
   box-shadow: 0 4px 24px #e2e2f2;
@@ -76,10 +78,10 @@ body, .numbl-root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
   flex-shrink: 0;
   width: 100%;
-  max-width: 19.5rem;
+  max-width: min(19.5rem, 90vw);
   margin-left: auto;
   margin-right: auto;
 }
@@ -96,24 +98,24 @@ body, .numbl-root {
 
 .numbl-grid {
   border-collapse: separate;
-  border-spacing: 0.5rem;
-  margin-bottom: 0.5rem;
+  border-spacing: clamp(0.25rem, 1vh, 0.5rem);
+  margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
   box-shadow: 0 4px 24px #e2e2f2;
   background: #fff;
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: clamp(0.5rem, 2vh, 1rem);
+  padding: clamp(0.5rem, 2vh, 1rem);
   width: fit-content;
-  max-width: 19.5rem;
+  max-width: min(19.5rem, 90vw);
   box-sizing: border-box;
   table-layout: fixed;
 }
 
 .numbl-cell {
-  width: 4rem;
-  height: 4rem;
-  font-size: 2.2rem;
+  width: clamp(3rem, 12vw, 4rem);
+  height: clamp(3rem, 12vw, 4rem);
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
   text-align: center;
-  border-radius: 0.7rem;
+  border-radius: clamp(0.4rem, 1.5vh, 0.7rem);
   cursor: pointer;
   font-weight: 600;
   box-shadow: 0 1px 4px #e2e2f2;
@@ -178,8 +180,6 @@ body, .numbl-root {
   100% { box-shadow: 0 0 0 8px #e0e0e033; }
 }
 
-
-
 .feedback-exists-elsewhere {
   background: #e0e0e0 !important;
   animation: existsElsewhereAnim 0.3s;
@@ -204,9 +204,9 @@ body, .numbl-root {
 }
 
 .numbl-constraints-container {
-  margin-bottom: 0.8rem;
+  margin-bottom: clamp(0.4rem, 2vh, 0.8rem);
   width: 100%;
-  max-width: 19.5rem;
+  max-width: min(19.5rem, 90vw);
   display: flex;
   justify-content: center;
   margin-left: auto;
@@ -217,14 +217,14 @@ body, .numbl-root {
 .numbl-constraints-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vh, 1rem);
   width: 100%;
 }
 
 .numbl-constraints-section {
   background: #fff;
-  border-radius: 1rem;
-  padding: 0.3rem;
+  border-radius: clamp(0.5rem, 2vh, 1rem);
+  padding: clamp(0.15rem, 1vh, 0.3rem);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border: 1px solid #e9ecef;
   box-sizing: border-box;
@@ -238,8 +238,8 @@ body, .numbl-root {
 }
 
 .numbl-constraints-section h3 {
-  margin: 0.5rem 0 0.4rem 0;
-  font-size: 0.8rem;
+  margin: clamp(0.25rem, 1vh, 0.5rem) 0 clamp(0.2rem, 1vh, 0.4rem) 0;
+  font-size: clamp(0.6rem, 2.5vh, 0.8rem);
   font-weight: 600;
   color: #222;
   text-align: center;
@@ -250,80 +250,75 @@ body, .numbl-root {
 .numbl-constraints-list {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: clamp(0.1rem, 0.5vh, 0.2rem);
 }
 
 .numbl-constraint-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.1rem 0;
-  width: 100%;
   justify-content: center;
+  padding: clamp(0.025rem, 0.5vh, 0.05rem) 0;
+  height: clamp(20px, 4vh, 30px);
+  min-height: 20px;
 }
 
 .numbl-constraint-text {
-  font-weight: 700;
-  color: #6c757d;
-  font-size: 1.1rem;
-  padding: 0.15rem 0.3rem;
-  border-radius: 0.4rem;
-  transition: all 0.2s ease;
+  font-size: clamp(0.7rem, 2.5vh, 0.9rem);
+  font-weight: 500;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 35px;
+  padding: clamp(0.1rem, 0.5vh, 0.2rem) clamp(0.2rem, 1vh, 0.4rem);
+  border-radius: clamp(0.2rem, 1vh, 0.4rem);
+  background: #f8f9fa;
+  color: #495057;
+  transition: all 0.2s ease;
+  word-break: break-word;
+  line-height: 1.2;
 }
 
 .numbl-constraint-text.met {
-  background: #e9ecef;
-  color: #495057;
+  background: #d4edda;
+  color: #155724;
 }
 
 .numbl-constraint-text.guessed-correct {
   background: #b5ead7;
   color: #155724;
+  animation: correctAnim 0.3s;
 }
 
-/* Constraint type styles */
 .constraint-sum {
-  font-weight: 700;
-  color: #2c3e50;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: #e3f2fd !important;
+  color: #1565c0 !important;
 }
 
 .constraint-odd {
-  font-weight: 600;
-  color: #8e44ad;
-  text-shadow: 0 1px 2px rgba(142, 68, 173, 0.2);
+  background: #fff3e0 !important;
+  color: #ef6c00 !important;
 }
 
 .constraint-even {
-  font-weight: 600;
-  color: #f39c12;
-  text-shadow: 0 1px 2px rgba(243, 156, 18, 0.2);
+  background: #f3e5f5 !important;
+  color: #7b1fa2 !important;
 }
 
 .constraint-unique {
-  font-weight: 600;
-  color: #2980b9;
-  text-shadow: 0 1px 2px rgba(41, 128, 185, 0.2);
+  background: #e8f5e8 !important;
+  color: #2e7d32 !important;
 }
 
 .numbl-puzzle-id {
   display: none;
 }
 
-
-
 .numbl-inputs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.3rem;
-  margin-bottom: 0.8rem;
-  width: 10.8rem;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(0.125rem, 1vh, 0.25rem);
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  width: fit-content;
+  max-width: 95vw;
+  flex-shrink: 0;
   justify-items: center;
   align-items: center;
   margin-left: auto;
@@ -331,97 +326,89 @@ body, .numbl-root {
 }
 
 .numbl-num-btn {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 0.4rem;
-  height: 2.5rem;
-  width: 2.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #495057;
+  height: clamp(1.5rem, 4vh, 2.8rem);
+  width: clamp(1.5rem, 4vh, 2.8rem);
+  font-size: clamp(0.7rem, 2vh, 1.2rem);
+  border: none;
+  border-radius: clamp(0.3rem, 1vh, 0.5rem);
+  background: #fff;
+  color: #222;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: all 0.15s ease;
-  outline: none;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
   font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  position: relative;
-  overflow: hidden;
   box-sizing: border-box;
 }
 .numbl-num-btn:hover {
   background: #f8f9fa;
-  border-color: #9ca3af;
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-
 .numbl-num-btn:active {
-  background: #e9ecef;
-  border-color: #6b7280;
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .numbl-num-btn:disabled {
-  background: #f0f0f0;
-  color: #bbb;
+  background: #e9ecef;
+  color: #6c757d;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .numbl-guess-btn {
   background: #28a745;
   border: none;
-  border-radius: 1rem;
-  padding: 1rem;
-  font-size: 1.2rem;
+  border-radius: clamp(0.5rem, 2vh, 1rem);
+  padding: clamp(0.6rem, 2.5vh, 1rem);
+  font-size: clamp(0.9rem, 3vh, 1.2rem);
   font-weight: 700;
   color: white;
-  margin-top: 0.3rem;
   cursor: pointer;
-  box-shadow: 0 4px 24px #e2e2f2;
   transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 4px 24px rgba(40, 167, 69, 0.3);
   font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   width: 100%;
-  max-width: 19.5rem;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: min(19.5rem, 90vw);
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  flex-shrink: 0;
 }
 .numbl-guess-btn:active {
   background: #218838;
   transform: scale(0.97);
 }
 .numbl-guess-btn:disabled {
-  background: #e9ecef;
-  color: #6c757d;
+  background: #6c757d;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
 .numbl-credits {
+  font-size: clamp(0.7rem, 2vh, 0.8rem);
+  color: #6c757d;
   text-align: center;
-  font-size: 0.8rem;
-  color: #6c757d;
-  margin-top: 0.5rem;
-  opacity: 0.8;
+  margin-top: auto;
+  padding-top: clamp(0.5rem, 2vh, 1rem);
+  flex-shrink: 0;
 }
-
 .numbl-credits a {
-  color: #6c757d;
+  color: #6c5ce7;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
-
 .numbl-credits a:hover {
-  color: #495057;
+  color: #5f3dc4;
   text-decoration: underline;
 }
 
@@ -431,138 +418,223 @@ body, .numbl-root {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .win-modal-content {
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
+  background: #2c3e50;
+  color: white;
+  padding: clamp(1rem, 4vh, 2rem);
+  border-radius: clamp(0.5rem, 2vh, 1rem);
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
-  width: 90%;
+  max-width: min(400px, 90vw);
+  max-height: min(80vh, 600px);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .win-modal h2 {
-  color: #222;
-  font-size: 1.8rem;
-  margin: 0 0 1rem 0;
-  font-weight: 700;
+  margin: 0 0 clamp(0.5rem, 2vh, 1rem) 0;
+  font-size: clamp(1.5rem, 5vh, 2rem);
+  color: #ffd700;
 }
 
 .win-modal .time-display {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #28a745;
-  margin: 1.5rem 0;
-  font-family: monospace;
+  font-size: clamp(1.2rem, 4vh, 1.5rem);
+  font-family: 'Courier New', monospace;
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  color: #ecf0f1;
 }
 
 .win-modal .puzzle-id {
-  font-size: 0.9rem;
-  color: #6c757d;
-  margin: 1rem 0;
-  font-family: monospace;
+  font-size: clamp(0.8rem, 2.5vh, 1rem);
+  color: #bdc3c7;
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
 }
 
 .win-modal-buttons {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vh, 1rem);
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: clamp(1rem, 4vh, 2rem);
 }
 
 .win-modal-btn {
-  padding: 0.8rem 1.5rem;
+  padding: clamp(0.5rem, 2vh, 1rem) clamp(1rem, 3vh, 2rem);
   border: none;
-  border-radius: 0.8rem;
+  border-radius: clamp(0.3rem, 1vh, 0.5rem);
+  font-size: clamp(0.9rem, 3vh, 1rem);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
 }
-
 .win-modal-btn.primary {
-  background: #4a90e2;
+  background: #6c5ce7;
   color: white;
 }
-
 .win-modal-btn.secondary {
-  background: #e9ecef;
-  color: #6c757d;
+  background: #6c757d;
+  color: white;
 }
-
 .win-modal-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-
-
-/* Mobile layout */
+/* Enhanced responsive design for different screen sizes */
 @media (max-width: 600px) {
+  .numbl-root {
+    padding: clamp(0.25rem, 1vh, 0.5rem);
+  }
+
   .numbl-header {
-    max-width: 100%;
+    max-width: 95vw;
   }
+
   .numbl-grid-container {
-    max-width: 100%;
+    max-width: 95vw;
   }
+
   .numbl-grid {
-    padding: 0.5rem;
-    max-width: 100%;
+    padding: clamp(0.25rem, 1vh, 0.5rem);
+    max-width: 95vw;
   }
+
   .numbl-cell {
-    width: 4.5rem;
-    height: 4.5rem;
-    font-size: 1.8rem;
+    width: clamp(2.5rem, 10vw, 4.5rem);
+    height: clamp(2.5rem, 10vw, 4.5rem);
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
   }
+
   .numbl-header h1 {
-    font-size: 1.8rem;
+    font-size: clamp(1.2rem, 5vh, 1.8rem);
   }
+
   .numbl-constraints-container {
-    max-width: 100%;
+    max-width: 95vw;
   }
+
   .numbl-constraints-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 0.4rem;
-    max-width: 100%;
+    gap: clamp(0.2rem, 1vh, 0.4rem);
+    max-width: 95vw;
   }
 
   .numbl-constraints-section {
-    padding: 0.25rem;
+    padding: clamp(0.1rem, 0.5vh, 0.25rem);
   }
 
   .numbl-constraint-item {
-    padding: 0.05rem 0;
-    height: 30px;
+    padding: clamp(0.025rem, 0.25vh, 0.05rem) 0;
+    height: clamp(18px, 3.5vh, 30px);
   }
 
   .numbl-constraint-text {
-    font-size: 0.9rem;
+    font-size: clamp(0.6rem, 2vh, 0.9rem);
   }
+
   .numbl-inputs {
-    gap: 0.25rem;
-    max-width: 100%;
-    width: 9.6rem;
+    gap: clamp(0.05rem, 0.25vh, 0.15rem);
+    max-width: 95vw;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
   }
+
   .numbl-num-btn {
-    height: 2.8rem;
-    width: 2.8rem;
-    font-size: 1.2rem;
+    height: clamp(1.5rem, 4vh, 2.8rem);
+    width: clamp(1.5rem, 4vh, 2.8rem);
+    font-size: clamp(0.7rem, 2vh, 1.2rem);
   }
+
   .numbl-guess-btn {
-    font-size: 1rem;
-    padding: 0.8rem;
-    max-width: 100%;
+    font-size: clamp(0.8rem, 2.5vh, 1rem);
+    padding: clamp(0.6rem, 2vh, 0.8rem);
+    max-width: 95vw;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 400px) {
+  .numbl-cell {
+    width: clamp(2rem, 8vw, 2.5rem);
+    height: clamp(2rem, 8vw, 2.5rem);
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+  }
+
+  .numbl-num-btn {
+    height: clamp(1.2rem, 3vh, 1.5rem);
+    width: clamp(1.2rem, 3vh, 1.5rem);
+    font-size: clamp(0.6rem, 1.5vh, 0.7rem);
+  }
+
+  .numbl-header h1 {
+    font-size: clamp(1rem, 4vh, 1.2rem);
+  }
+
+  .numbl-inputs {
+    gap: clamp(0.025rem, 0.15vh, 0.1rem);
+  }
+}
+
+/* Tall screens - optimize for height */
+@media (min-height: 800px) {
+  .numbl-root {
+    padding: clamp(1rem, 3vh, 2rem);
+  }
+
+  .numbl-cell {
+    width: clamp(3.5rem, 8vh, 4.5rem);
+    height: clamp(3.5rem, 8vh, 4.5rem);
+    font-size: clamp(1.8rem, 4vh, 2.2rem);
+  }
+
+  .numbl-num-btn {
+    height: clamp(2.5rem, 5vh, 3rem);
+    width: clamp(2.5rem, 5vh, 3rem);
+    font-size: clamp(1.1rem, 2.5vh, 1.3rem);
+  }
+}
+
+/* Short screens - compact layout */
+@media (max-height: 600px) {
+  .numbl-root {
+    padding: clamp(0.25rem, 1vh, 0.5rem);
+  }
+
+  .numbl-header {
+    margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
+  }
+
+  .numbl-header h1 {
+    font-size: clamp(1rem, 4vh, 1.5rem);
+    margin-bottom: clamp(0.1rem, 0.5vh, 0.25rem);
+  }
+
+  .numbl-constraints-container {
+    margin-bottom: clamp(0.2rem, 1vh, 0.4rem);
+  }
+
+  .numbl-grid-container {
+    margin-bottom: clamp(0.1rem, 0.5vh, 0.25rem);
+  }
+
+  .numbl-inputs {
+    margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
+  }
+
+  .numbl-guess-btn {
+    margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
+  }
+
+  .numbl-credits {
+    padding-top: clamp(0.25rem, 1vh, 0.5rem);
   }
 }
 
@@ -635,15 +707,15 @@ body, .numbl-root {
 .numbl-stats {
   display: flex;
   flex-direction: row;
-  gap: 24px;
+  gap: clamp(12px, 3vw, 24px);
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 0.5rem;
+  margin-bottom: clamp(0.25rem, 1vh, 0.5rem);
 }
 
 .numbl-timer {
-  font-size: 1.2rem;
+  font-size: clamp(0.9rem, 3vh, 1.2rem);
   color: #6c757d;
   font-family: 'Courier New', monospace;
   font-weight: 600;
@@ -658,7 +730,7 @@ body, .numbl-root {
 .numbl-score {
   display: flex;
   align-items: center;
-  font-size: 1.2em;
+  font-size: clamp(1rem, 3vh, 1.2em);
   font-weight: bold;
   color: #ffd700;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
@@ -682,51 +754,52 @@ body, .numbl-root {
 
 /* Score breakdown in win modal */
 .score-breakdown {
-  margin: 20px 0;
-  padding: 15px;
+  margin: clamp(10px, 3vh, 20px) 0;
+  padding: clamp(8px, 2vh, 15px);
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .score-breakdown h3 {
-  margin: 0 0 15px 0;
+  margin: 0 0 clamp(8px, 2vh, 15px) 0;
   color: #ffd700;
   text-align: center;
+  font-size: clamp(1rem, 3vh, 1.2rem);
 }
 
 .score-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(4px, 1vh, 8px);
 }
 
 .score-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0;
+  padding: clamp(2px, 0.5vh, 4px) 0;
+  font-size: clamp(0.8rem, 2.5vh, 0.9rem);
 }
 
 .score-row.total {
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-  padding-top: 8px;
-  margin-top: 8px;
   font-weight: bold;
-  font-size: 1.1em;
-  color: #ffd700;
+  font-size: clamp(0.9rem, 3vh, 1rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: clamp(4px, 1vh, 8px);
+  margin-top: clamp(4px, 1vh, 8px);
 }
 
 .score-row.multipliers {
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: clamp(2px, 0.5vh, 4px);
 }
 
 .multiplier {
   background: rgba(255, 215, 0, 0.2);
-  padding: 2px 8px;
+  padding: clamp(2px, 0.5vh, 4px) clamp(4px, 1vh, 8px);
   border-radius: 4px;
-  font-size: 0.9em;
-  margin-left: 10px;
+  font-size: clamp(0.7rem, 2vh, 0.8rem);
+  margin-right: clamp(4px, 1vh, 8px);
 }

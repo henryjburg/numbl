@@ -50,8 +50,12 @@ const App: React.FC = () => {
   const lastClickTime = React.useRef(0);
   const pressedKeys = React.useRef<Set<string>>(new Set());
 
-  // Generate hash for current puzzle
+  // Generate hash for current puzzle (for internal use)
   const currentHash = generatePuzzleHash(puzzle);
+
+  // Get current path as puzzle ID (for display)
+  const currentPath = window.location.pathname || '/';
+  const puzzleId = currentPath === '/' ? 'home' : currentPath.substring(1);
 
   // Track duplicates
   const duplicates = getDuplicates(board);
@@ -482,7 +486,7 @@ const App: React.FC = () => {
 
   // Handle sharing result
   const handleShareResult = () => {
-    const shareText = `I finished numbl ${currentHash.substring(0, 8)} in ${formatTime(timer)}!\n\nTry and beat me: https://numbl.net`;
+    const shareText = `I finished numbl ${puzzleId} in ${formatTime(timer)}!\n\nTry and beat me: https://numbl.net`;
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareText).catch(err => {
@@ -603,7 +607,7 @@ const App: React.FC = () => {
           </tbody>
         </table>
         <div className="numbl-puzzle-id">
-          Puzzle: {currentHash.substring(0, 8)}
+          Puzzle: {puzzleId}
         </div>
       </div>
       <div className="numbl-inputs">
@@ -662,7 +666,7 @@ const App: React.FC = () => {
           <div className="win-modal-content">
             <h2>numbl finished!</h2>
             <div className="time-display">{formatTime(timer)}</div>
-            <div className="puzzle-id">Puzzle: {currentHash.substring(0, 8)}</div>
+            <div className="puzzle-id">Puzzle: {puzzleId}</div>
             {scoreBreakdown && (
               <div className="score-breakdown">
                 <h3>Final Score: {formatScore(scoreBreakdown.totalScore)}</h3>
