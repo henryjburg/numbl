@@ -683,16 +683,6 @@ const App: React.FC = () => {
     checkForGuessingEligibility(board);
   };
 
-  const handleRowConstraintClick = () => {
-    if (!active || !selected) return;
-    setIsColumnFocus(false);
-  };
-
-  const handleColumnConstraintClick = () => {
-    if (!active || !selected) return;
-    setIsColumnFocus(true);
-  };
-
   return (
     <div className="numbl-root">
       <div className="numbl-header">
@@ -730,7 +720,6 @@ const App: React.FC = () => {
             ))
           )}
         </div>
-        <div className="numbl-puzzle-id">Today's Puzzle</div>
       </div>
       <div className="numbl-constraints-container">
         {selected && (
@@ -885,7 +874,6 @@ const App: React.FC = () => {
         <div className="win-modal">
           <div className="win-modal-content">
             <h2>numbl finished!</h2>
-            <div className="puzzle-id">Today's Puzzle</div>
             {isNewHighScore && (
               <div className="high-score-banner">🏆 New High Score! 🏆</div>
             )}
@@ -973,7 +961,11 @@ const App: React.FC = () => {
                         </div>
                         <div className="score-row high-score">
                           <span>High Score:</span>
-                          <span>{formatScore(highScore)}</span>
+                          <span>
+                            {formatScore(
+                              isNewHighScore ? finalTotalScore : highScore
+                            )}
+                          </span>
                         </div>
                       </div>
                     </>
