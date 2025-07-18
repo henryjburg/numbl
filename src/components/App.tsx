@@ -79,10 +79,6 @@ const App: React.FC = () => {
   const [constraintTooltipVisible, setConstraintTooltipVisible] =
     useState(false);
   const [constraintTooltipText, setConstraintTooltipText] = useState('');
-  const [constraintTooltipPosition, setConstraintTooltipPosition] = useState({
-    x: 0,
-    y: 0,
-  });
 
   const helpPages = [
     {
