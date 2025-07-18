@@ -1,3 +1,10 @@
+/**
+ * © 2025 Henry Burgess. All rights reserved.
+ *
+ * Numbl - A challenging number puzzle game
+ * This file contains the main application component.
+ */
+
 import React, { useState, useEffect } from 'react';
 import '../styles/App.css';
 import { Puzzle, FeedbackType } from '../types/puzzle';

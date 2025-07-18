@@ -1,3 +1,9 @@
+/**
+ * © 2025 Henry Burgess. All rights reserved.
+ *
+ * Puzzle Generator - Generates daily puzzles with mathematical constraints
+ */
+
 import { Puzzle, Constraint } from '../types/puzzle';
 
 const UNIVERSAL_DATE = '2024-01-01';

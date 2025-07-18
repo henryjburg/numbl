@@ -1,7 +1,23 @@
 {
   "name": "numbl",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "license": "UNLICENSED",
+  "author": "Henry Burgess",
+  "description": "A daily number puzzle game with mathematical constraints",
+  "keywords": [
+    "puzzle",
+    "game",
+    "numbers",
+    "math",
+    "react",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/henryburgess/numbl.git"
+  },
+  "homepage": "https://henryburgess.github.io/numbl",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

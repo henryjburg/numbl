@@ -1,3 +1,9 @@
+/**
+ * © 2025 Henry Burgess. All rights reserved.
+ *
+ * Puzzle Utilities - Core game logic and constraint validation
+ */
+
 import { Constraint, Puzzle, FeedbackType } from '../types/puzzle';
 
 export const getConstraintName = (constraint: Constraint): string => {

@@ -1,3 +1,9 @@
+/**
+ * © 2025 Henry Burgess. All rights reserved.
+ *
+ * Scoring Utilities - Game scoring and bonus calculations
+ */
+
 import {
   Puzzle,
   FeedbackType,
