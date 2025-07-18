@@ -1,6 +1,5 @@
 import { PuzzleGenerator } from '../utils/puzzleGenerator';
 
-// Helper function to get constraint type
 function getConstraintType(constraint: any): string {
   if (constraint.sum !== undefined) return 'sum';
   if (constraint.even === true) return 'even';
@@ -20,7 +19,6 @@ describe('PuzzleGenerator', () => {
   test('should have 4-5 pre-filled cells in starting board', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
-    // Count pre-filled cells (non-null values)
     const preFilledCells = puzzle.startingBoard
       .flat()
       .filter(cell => cell !== null);
@@ -32,7 +30,6 @@ describe('PuzzleGenerator', () => {
   test('should use only digits 1-9', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
-    // Check solution uses only 1-9
     puzzle.solution.forEach(row => {
       row.forEach(cell => {
         expect(cell).toBeGreaterThanOrEqual(1);
@@ -40,7 +37,6 @@ describe('PuzzleGenerator', () => {
       });
     });
 
-    // Check starting board uses only 1-9
     const preFilledCells = puzzle.startingBoard
       .flat()
       .filter(cell => cell !== null);
@@ -86,7 +82,6 @@ describe('PuzzleGenerator', () => {
   test('should have contains constraints only when no pre-filled cells', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
-    // Check rows with contains constraints
     const rowsWithContains = puzzle.rowConstraints
       .map((constraint, index) => ({ constraint, index }))
       .filter(({ constraint }) => constraint.contains);
@@ -98,7 +93,6 @@ describe('PuzzleGenerator', () => {
       expect(hasPreFilled).toBe(false);
     });
 
-    // Check columns with contains constraints
     const colsWithContains = puzzle.colConstraints
       .map((constraint, index) => ({ constraint, index }))
       .filter(({ constraint }) => constraint.contains);

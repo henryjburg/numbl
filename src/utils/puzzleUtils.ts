@@ -28,10 +28,9 @@ export const getConstraintType = (
   if (constraint.even === false) return 'odd';
   if (constraint.contains) return 'contains';
   if (constraint.range) return 'range';
-  return 'sum'; // fallback
+  return 'sum';
 };
 
-// Check if a constraint is satisfied
 export const isConstraintSatisfied = (
   puzzle: Puzzle,
   board: string[][],
@@ -70,7 +69,6 @@ export const isConstraintSatisfied = (
   return false;
 };
 
-// Check if a constraint has been formally guessed and confirmed correct
 export const isConstraintGuessedCorrect = (
   feedback: FeedbackType[][],
   lineType: 'row' | 'col',
@@ -81,16 +79,13 @@ export const isConstraintGuessedCorrect = (
   return line.every(cell => cell === 'correct');
 };
 
-// Check if puzzle is complete (all cells are correct)
 export const isPuzzleComplete = (feedback: FeedbackType[][]): boolean => {
   return feedback.every(row => row.every(cell => cell === 'correct'));
 };
 
-// Check for duplicates within rows and columns (no duplicates allowed in same row/column)
 export const getDuplicates = (board: string[][]): Set<string> => {
   const duplicates = new Set<string>();
 
-  // Check for duplicates in each row
   for (let row = 0; row < 4; row++) {
     const rowNumbers = new Map<string, number>();
     for (let col = 0; col < 4; col++) {
@@ -101,7 +96,6 @@ export const getDuplicates = (board: string[][]): Set<string> => {
       }
     }
 
-    // Mark duplicates in this row
     rowNumbers.forEach((count, num) => {
       if (count > 1) {
         for (let col = 0; col < 4; col++) {
@@ -113,7 +107,6 @@ export const getDuplicates = (board: string[][]): Set<string> => {
     });
   }
 
-  // Check for duplicates in each column
   for (let col = 0; col < 4; col++) {
     const colNumbers = new Map<string, number>();
     for (let row = 0; row < 4; row++) {
@@ -124,7 +117,6 @@ export const getDuplicates = (board: string[][]): Set<string> => {
       }
     }
 
-    // Mark duplicates in this column
     colNumbers.forEach((count, num) => {
       if (count > 1) {
         for (let row = 0; row < 4; row++) {
@@ -139,7 +131,6 @@ export const getDuplicates = (board: string[][]): Set<string> => {
   return duplicates;
 };
 
-// Check if a specific row or column has duplicates
 export const hasDuplicatesInLine = (
   board: string[][],
   lineType: 'row' | 'col',
@@ -148,7 +139,6 @@ export const hasDuplicatesInLine = (
   const numbers = new Map<string, number>();
 
   if (lineType === 'row') {
-    // Check for duplicates in the specified row
     for (let col = 0; col < 4; col++) {
       const cell = board[index][col];
       if (cell !== '') {
@@ -157,7 +147,6 @@ export const hasDuplicatesInLine = (
       }
     }
   } else {
-    // Check for duplicates in the specified column
     for (let row = 0; row < 4; row++) {
       const cell = board[row][index];
       if (cell !== '') {
@@ -167,7 +156,6 @@ export const hasDuplicatesInLine = (
     }
   }
 
-  // Check if any number appears more than once in this line
   for (let i = 0; i < numbers.size; i++) {
     const count = Array.from(numbers.values())[i];
     if (count > 1) {
@@ -178,9 +166,7 @@ export const hasDuplicatesInLine = (
   return false;
 };
 
-// Generate unique hash for puzzle
 export const generatePuzzleHash = (puzzle: Puzzle): string => {
-  // Create a string representation of the puzzle
   const solutionStr = puzzle.solution.flat().join('');
   const rowConstraintsStr = puzzle.rowConstraints
     .map(c => {
@@ -203,12 +189,11 @@ export const generatePuzzleHash = (puzzle: Puzzle): string => {
 
   const puzzleStr = `${solutionStr}|${rowConstraintsStr}|${colConstraintsStr}`;
 
-  // Simple hash function (you could use a more sophisticated one)
   let hash = 0;
   for (let i = 0; i < puzzleStr.length; i++) {
     const char = puzzleStr.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
+    hash = hash & hash;
   }
 
   return Math.abs(hash).toString(36).toUpperCase();

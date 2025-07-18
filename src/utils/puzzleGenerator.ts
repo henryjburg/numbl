@@ -1,6 +1,5 @@
-import { Puzzle, Constraint, ConstraintType } from '../types/puzzle';
+import { Puzzle, Constraint } from '../types/puzzle';
 
-// Universal date for seeding - you can change this to any fixed date
 const UNIVERSAL_DATE = '2024-01-01';
 
 export class PuzzleGenerator {
@@ -17,17 +16,15 @@ export class PuzzleGenerator {
       (dateObj.getTime() - universalDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    // Create a deterministic seed from the date
     let seed = 0;
     for (let i = 0; i < date.length; i++) {
       seed = (seed << 5) - seed + date.charCodeAt(i);
-      seed = seed & seed; // Convert to 32-bit integer
+      seed = seed & seed;
     }
     return seed + daysDiff;
   }
 
   private seededRandom(): number {
-    // Simple seeded random number generator
     this.seed = (this.seed * 9301 + 49297) % 233280;
     return this.seed / 233280;
   }
@@ -45,11 +42,9 @@ export class PuzzleGenerator {
   }
 
   private generateRandomGrid(): number[][] {
-    // Generate numbers 1-9 in random order
     const numbers = Array.from({ length: 9 }, (_, i) => i + 1);
     const shuffledNumbers = this.shuffleArray(numbers);
 
-    // Arrange into 4x4 grid (we'll use 9 numbers, some will be repeated)
     const grid: number[][] = [];
     for (let i = 0; i < 4; i++) {
       grid[i] = [];
@@ -67,26 +62,21 @@ export class PuzzleGenerator {
     rowConstraints: Constraint[],
     colConstraints: Constraint[]
   ): (number | null)[][] {
-    // Create a starting board with 4 strategic pre-filled cells
     const startingBoard: (number | null)[][] = solution.map(row =>
       row.map(() => null)
     );
 
-    // Strategy: Pre-fill cells that help with the most challenging constraints
     const positions: Array<{ row: number; col: number; priority: number }> = [];
 
-    // Calculate priority for each position based on constraint complexity
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 4; col++) {
         let priority = 0;
 
-        // Higher priority for cells that help with complex constraints
         const rowConstraint = rowConstraints[row];
         const colConstraint = colConstraints[col];
 
-        // Don't pre-fill cells in rows/columns with contains constraints
         if (rowConstraint.contains || colConstraint.contains) {
-          continue; // Skip this position entirely
+          continue;
         }
 
         if (rowConstraint.range || colConstraint.range) priority += 2;
@@ -96,7 +86,6 @@ export class PuzzleGenerator {
         )
           priority += 1;
 
-        // Bonus for corner cells (they affect both row and column)
         if ((row === 0 || row === 3) && (col === 0 || col === 3)) {
           priority += 2;
         }
@@ -105,7 +94,6 @@ export class PuzzleGenerator {
       }
     }
 
-    // Sort by priority (highest first) and take the top 4
     positions.sort((a, b) => b.priority - a.priority);
 
     for (let i = 0; i < 4 && i < positions.length; i++) {
@@ -128,23 +116,19 @@ export class PuzzleGenerator {
     const minNum = Math.min(...numbers);
     const maxNum = Math.max(...numbers);
 
-    // Collect all possible constraints with more flexible conditions
     const availableConstraints: Array<{
       constraint: Constraint;
       type: string;
     }> = [];
 
-    // Sum constraint is always available
     availableConstraints.push({ constraint: { sum }, type: 'sum' });
 
-    // Even constraint - only create if ALL numbers are even or ALL are odd
     if (evens === 4) {
       availableConstraints.push({ constraint: { even: true }, type: 'even' });
     } else if (evens === 0) {
       availableConstraints.push({ constraint: { even: false }, type: 'odd' });
     }
 
-    // Contains constraint - more flexible: available if we have at least 2 unique numbers
     if (uniqueNumbers.length >= 2) {
       const shuffled = this.shuffleArray(uniqueNumbers);
       availableConstraints.push({
@@ -153,27 +137,22 @@ export class PuzzleGenerator {
       });
     }
 
-    // Range constraints - create meaningful ranges based on the numbers
     const rangeSize = maxNum - minNum + 1;
     if (rangeSize <= 5) {
-      // Only create range constraints for reasonably sized ranges
       availableConstraints.push({
         constraint: { range: { min: minNum, max: maxNum } },
         type: 'range',
       });
     }
 
-    // Ensure we always have at least one constraint (sum is always available)
     if (availableConstraints.length === 0) {
       return { constraint: { sum }, type: 'sum' };
     }
 
-    // Filter out already used constraint types to maximize diversity
     const unusedConstraints = availableConstraints.filter(
       c => !usedConstraints.has(c.type)
     );
 
-    // If we have unused constraint types, prefer those
     if (unusedConstraints.length > 0) {
       const randomIndex = Math.floor(
         this.seededRandom() * unusedConstraints.length
@@ -183,7 +162,6 @@ export class PuzzleGenerator {
       }
     }
 
-    // Otherwise, choose from all available constraints
     const randomIndex = Math.floor(
       this.seededRandom() * availableConstraints.length
     );
@@ -191,49 +169,43 @@ export class PuzzleGenerator {
       return availableConstraints[randomIndex];
     }
 
-    // Fallback to first available constraint
     return availableConstraints[0];
   }
 
   public generatePuzzle(
     date: string = new Date().toISOString().split('T')[0]
   ): Puzzle {
-    // Update seed for the specific date
     this.seed = this.generateSeedFromDate(date);
 
-    // Generate random solution
     const solution = this.generateRandomGrid();
+    const usedConstraintTypes = new Set<string>();
 
-    // Generate constraints for rows and columns first
+    const rowNumbers = solution.map(row => [...row]);
+    const colNumbers = solution[0].map((_, col) =>
+      solution.map(row => row[col])
+    );
+
     const rowConstraints: Constraint[] = [];
     const colConstraints: Constraint[] = [];
-    const usedConstraintTypes: Set<string> = new Set();
 
-    // Generate row constraints
     for (let i = 0; i < 4; i++) {
-      const rowNumbers = solution[i];
-      const constraintResult = this.generateConstraint(
-        rowNumbers,
+      const rowConstraint = this.generateConstraint(
+        rowNumbers[i],
         false,
         usedConstraintTypes
       );
-      rowConstraints.push(constraintResult.constraint);
-      usedConstraintTypes.add(constraintResult.type);
-    }
+      rowConstraints.push(rowConstraint.constraint);
+      usedConstraintTypes.add(rowConstraint.type);
 
-    // Generate column constraints
-    for (let i = 0; i < 4; i++) {
-      const colNumbers = solution.map(row => row[i]);
-      const constraintResult = this.generateConstraint(
-        colNumbers,
+      const colConstraint = this.generateConstraint(
+        colNumbers[i],
         false,
         usedConstraintTypes
       );
-      colConstraints.push(constraintResult.constraint);
-      usedConstraintTypes.add(constraintResult.type);
+      colConstraints.push(colConstraint.constraint);
+      usedConstraintTypes.add(colConstraint.type);
     }
 
-    // Now choose strategic pre-filled cells based on constraints
     const startingBoard = this.generateStrategicStartingBoard(
       solution,
       rowConstraints,
@@ -242,14 +214,14 @@ export class PuzzleGenerator {
 
     return {
       solution,
-      startingBoard,
       rowConstraints,
       colConstraints,
+      startingBoard,
       date,
     };
   }
 
   public getTodaysPuzzle(): Puzzle {
-    return this.generatePuzzle(new Date().toISOString().split('T')[0]);
+    return this.generatePuzzle();
   }
 }
