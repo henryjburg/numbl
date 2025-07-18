@@ -208,6 +208,8 @@ export const startingBoardToBoard = (
   startingBoard: (number | null)[][]
 ): string[][] => {
   return startingBoard.map(row =>
-    row.map(cell => (cell !== null ? cell.toString() : ''))
+    row.map(cell =>
+      cell !== null && cell !== undefined ? cell.toString() : ''
+    )
   );
 };
