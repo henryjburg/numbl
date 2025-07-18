@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface SettingsModalProps {
   settingsModalOpen: boolean;
@@ -15,7 +16,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!settingsModalOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="settings-modal">
       <div className="settings-modal-content">
         <h2>Settings</h2>
@@ -110,6 +111,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default SettingsModal;

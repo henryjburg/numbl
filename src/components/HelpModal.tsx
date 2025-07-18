@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface HelpModalProps {
   helpModalOpen: boolean;
@@ -17,7 +18,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
 }) => {
   if (!helpModalOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="settings-modal">
       <div className="settings-modal-content">
         <div className="help-header">
@@ -63,6 +64,8 @@ const HelpModal: React.FC<HelpModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default HelpModal;

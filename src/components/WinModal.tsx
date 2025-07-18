@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface WinModalProps {
   winModalOpen: boolean;
@@ -29,7 +30,7 @@ const WinModal: React.FC<WinModalProps> = ({
 }) => {
   if (!winModalOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="win-modal">
       <div className="win-modal-content">
         <h2>numbl finished!</h2>
@@ -142,6 +143,8 @@ const WinModal: React.FC<WinModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default WinModal;

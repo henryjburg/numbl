@@ -909,7 +909,7 @@ body,
 
   /* Fixed scale for all mobile devices */
   .numbl-root {
-    --mobile-scale: 0.8;
+    --mobile-scale: 0.9;
     transform: scale(var(--mobile-scale));
     transform-origin: top center;
     width: 100%;
