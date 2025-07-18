@@ -184,8 +184,17 @@ describe('scoringUtils', () => {
         timeInSeconds: 120,
       };
 
-      const score = calculateRunningScore(mockPuzzle, feedback, gameStats);
-      const expectedScore = 16 * 50 + (2 + 1) * 100; // 800 + 300 = 1100
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const score = calculateRunningScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
+      const expectedScore = 12 * 100 + (2 + 1) * 100; // 1200 + 300 = 1500 (12 scoreable tiles, 4 pre-filled)
       expect(score).toBe(expectedScore);
     });
 
@@ -207,7 +216,16 @@ describe('scoringUtils', () => {
         timeInSeconds: 60,
       };
 
-      const score = calculateRunningScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set<number>();
+      const guessedCols = new Set<number>();
+
+      const score = calculateRunningScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
       expect(score).toBe(0);
     });
 
@@ -229,8 +247,93 @@ describe('scoringUtils', () => {
         timeInSeconds: 60,
       };
 
-      const score = calculateRunningScore(mockPuzzle, feedback, gameStats);
-      expect(score).toBe(16 * 50); // 800
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const score = calculateRunningScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
+      expect(score).toBe(12 * 100); // 1200 (12 scoreable tiles, 4 pre-filled)
+    });
+  });
+
+  describe('calculateBaseScore', () => {
+    test('should score different tile types correctly', () => {
+      const feedback: FeedbackType[][] = [
+        ['correct', 'misplaced', 'wrong', 'none'],
+        ['correct', 'misplaced', 'wrong', 'none'],
+        ['correct', 'misplaced', 'wrong', 'none'],
+        ['correct', 'misplaced', 'wrong', 'none'],
+      ];
+
+      const gameStats: GameStats = {
+        totalGuesses: 4,
+        correctGuesses: 4,
+        wrongGuesses: 4,
+        firstTimeCorrectRows: 0,
+        firstTimeCorrectCols: 0,
+        firstTimeCorrectCells: 0,
+        timeInSeconds: 60,
+      };
+
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const score = calculateRunningScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
+
+      // Pre-filled tiles: [0,0], [1,1], [2,2], [3,3] - these are not scored
+      // Scoreable tiles: 12 total
+      // From the feedback pattern, we have:
+      // - 3 correct tiles (excluding [0,0] which is pre-filled)
+      // - 3 misplaced tiles (excluding [1,1] which is pre-filled)
+      // - 3 wrong tiles (excluding [2,2] which is pre-filled)
+      // - 3 none tiles (excluding [3,3] which is pre-filled)
+      // 3 correct * 100 + 3 misplaced * 50 + 3 wrong * 0 + 3 none * 0 = 300 + 150 = 450
+      expect(score).toBe(450);
+    });
+
+    test('should not score pre-filled tiles', () => {
+      const feedback: FeedbackType[][] = [
+        ['correct', 'correct', 'correct', 'correct'],
+        ['correct', 'correct', 'correct', 'correct'],
+        ['correct', 'correct', 'correct', 'correct'],
+        ['correct', 'correct', 'correct', 'correct'],
+      ];
+
+      const gameStats: GameStats = {
+        totalGuesses: 4,
+        correctGuesses: 12, // Only 12 scoreable tiles (4 are pre-filled)
+        wrongGuesses: 0,
+        firstTimeCorrectRows: 0,
+        firstTimeCorrectCols: 0,
+        firstTimeCorrectCells: 0,
+        timeInSeconds: 60,
+      };
+
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const score = calculateRunningScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
+
+      // Only 12 tiles are scoreable (4 are pre-filled)
+      // 12 correct tiles * 100 = 1200
+      expect(score).toBe(1200);
     });
   });
 
@@ -253,9 +356,18 @@ describe('scoringUtils', () => {
         timeInSeconds: 45,
       };
 
-      const scoreBreakdown = calculateScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
 
-      expect(scoreBreakdown.baseScore).toBe(0);
+      const scoreBreakdown = calculateScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
+
+      expect(scoreBreakdown.baseScore).toBe(1200); // 12 correct tiles * 100 (4 pre-filled)
       expect(scoreBreakdown.timeBonus).toBe(500);
       expect(scoreBreakdown.timeMultiplier).toBe(1.0);
       expect(scoreBreakdown.firstTimeCorrectBonus).toBe(300);
@@ -263,8 +375,8 @@ describe('scoringUtils', () => {
       expect(scoreBreakdown.efficiencyBonus).toBe(200);
       expect(scoreBreakdown.difficultyMultiplier).toBe(1.8);
 
-      const expectedSubtotal = 500 + 300 + 300 + 200; // 1300
-      const expectedTotal = Math.round(expectedSubtotal * 1.0 * 1.8); // 2340
+      const expectedSubtotal = 1200 + 500 + 300 + 300 + 200; // 2500 (12 scoreable tiles)
+      const expectedTotal = Math.round(expectedSubtotal * 1.0 * 1.8); // 4500
       expect(scoreBreakdown.totalScore).toBe(expectedTotal);
     });
 
@@ -286,7 +398,16 @@ describe('scoringUtils', () => {
         timeInSeconds: 60,
       };
 
-      const scoreBreakdown = calculateScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const scoreBreakdown = calculateScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
 
       expect(scoreBreakdown.perfectAccuracyBonus).toBe(0);
       expect(scoreBreakdown.efficiencyBonus).toBe(0); // More than 8 guesses
@@ -310,7 +431,16 @@ describe('scoringUtils', () => {
         timeInSeconds: 60,
       };
 
-      const scoreBreakdown = calculateScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const scoreBreakdown = calculateScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
 
       expect(scoreBreakdown.efficiencyBonus).toBe(0);
     });
@@ -333,7 +463,16 @@ describe('scoringUtils', () => {
         timeInSeconds: 120,
       };
 
-      const scoreBreakdown = calculateScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set([0, 1, 2]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const scoreBreakdown = calculateScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
 
       expect(scoreBreakdown.perfectAccuracyBonus).toBe(0);
       expect(scoreBreakdown.efficiencyBonus).toBe(0);
@@ -357,7 +496,16 @@ describe('scoringUtils', () => {
         timeInSeconds: 300,
       };
 
-      const scoreBreakdown = calculateScore(mockPuzzle, feedback, gameStats);
+      const guessedRows = new Set([0, 1, 2, 3]);
+      const guessedCols = new Set([0, 1, 2, 3]);
+
+      const scoreBreakdown = calculateScore(
+        mockPuzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
 
       expect(scoreBreakdown.timeBonus).toBe(0);
     });

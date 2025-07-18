@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const [puzzle, setPuzzle] = useState<Puzzle>(
     puzzleGenerator.getTodaysPuzzle()
   );
+  const [isDailyPuzzle, setIsDailyPuzzle] = useState(true);
 
   const [debugMode, setDebugMode] = useState(false);
   const [winModalOpen, setWinModalOpen] = useState(false);
@@ -495,7 +496,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (active) {
-      const runningScore = calculateRunningScore(puzzle, feedback, gameStats);
+      const runningScore = calculateRunningScore(
+        puzzle,
+        feedback,
+        gameStats,
+        guessedRows,
+        guessedCols
+      );
 
       if (runningScore > currentScore) {
         setScoreVibrate(true);
@@ -504,14 +511,28 @@ const App: React.FC = () => {
 
       setCurrentScore(runningScore);
     }
-  }, [gameStats, feedback, puzzle, active, currentScore]);
+  }, [
+    gameStats,
+    feedback,
+    puzzle,
+    active,
+    currentScore,
+    guessedRows,
+    guessedCols,
+  ]);
 
   useEffect(() => {
     if (active && isPuzzleComplete(feedback)) {
       setActive(false);
 
       const finalStats = { ...gameStats, timeInSeconds: timer };
-      const breakdown = calculateScore(puzzle, feedback, finalStats);
+      const breakdown = calculateScore(
+        puzzle,
+        feedback,
+        finalStats,
+        guessedRows,
+        guessedCols
+      );
       setScoreBreakdown(breakdown);
       setCurrentScore(breakdown.totalScore);
 
@@ -531,7 +552,16 @@ const App: React.FC = () => {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     }
-  }, [feedback, active, gameStats, timer, puzzle, highScore]);
+  }, [
+    feedback,
+    active,
+    gameStats,
+    timer,
+    puzzle,
+    highScore,
+    guessedRows,
+    guessedCols,
+  ]);
 
   const handleNumberInput = (num: string) => {
     if (!selected) return;
@@ -818,6 +848,7 @@ const App: React.FC = () => {
     setSelected({ row: 0, col: 0 });
     setIsColumnFocus(false);
     setPuzzle(todaysPuzzle);
+    setIsDailyPuzzle(true);
   };
 
   const handleNewRandomGame = () => {
@@ -869,6 +900,7 @@ const App: React.FC = () => {
     setSelected({ row: 0, col: 0 });
     setIsColumnFocus(false);
     setPuzzle(newPuzzle);
+    setIsDailyPuzzle(false);
   };
 
   const handleShareResult = () => {
@@ -1007,11 +1039,12 @@ const App: React.FC = () => {
                 <h1>numbl</h1>
               </div>
               <div className="numbl-date">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {isDailyPuzzle
+                  ? `Daily: ${new Date().toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                    })}`
+                  : 'Random'}
               </div>
             </div>
           </div>

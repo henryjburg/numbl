@@ -17,6 +17,10 @@ const SCORING = {
   EFFICIENCY_BONUS: 200,
   EFFICIENCY_THRESHOLD: 8,
   CORRECTNESS_MULTIPLIER_PER_FIRST_GUESS: 0.1,
+  // Base scoring for individual tiles
+  CORRECT_TILE_SCORE: 100,
+  MISPLACED_TILE_SCORE: 50,
+  WRONG_TILE_SCORE: 0,
 };
 
 export const calculateTimeBonuses = (
@@ -67,23 +71,73 @@ export const calculateDifficultyMultiplier = (
 export const calculateRunningScore = (
   puzzle: Puzzle,
   feedback: FeedbackType[][],
-  gameStats: GameStats
+  gameStats: GameStats,
+  guessedRows: Set<number>,
+  guessedCols: Set<number>
 ): number => {
-  const { correctGuesses, firstTimeCorrectRows, firstTimeCorrectCols } =
-    gameStats;
+  const { firstTimeCorrectRows, firstTimeCorrectCols } = gameStats;
 
-  const correctGuessPoints = correctGuesses * 50;
+  const baseScore = calculateBaseScore(
+    puzzle,
+    feedback,
+    guessedRows,
+    guessedCols
+  );
   const firstTimeCorrectBonus =
     (firstTimeCorrectRows + firstTimeCorrectCols) *
     SCORING.FIRST_TIME_CORRECT_BONUS;
 
-  return correctGuessPoints + firstTimeCorrectBonus;
+  return baseScore + firstTimeCorrectBonus;
+};
+
+export const calculateBaseScore = (
+  puzzle: Puzzle,
+  feedback: FeedbackType[][],
+  guessedRows: Set<number>,
+  guessedCols: Set<number>
+): number => {
+  let baseScore = 0;
+
+  // Score tiles that are in guessed rows or guessed columns
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      // Skip pre-filled cells
+      if (puzzle.startingBoard[row][col] !== null) {
+        continue;
+      }
+
+      // Only score if this tile is in a guessed row OR a guessed column
+      if (!guessedRows.has(row) && !guessedCols.has(col)) {
+        continue;
+      }
+
+      const tileFeedback = feedback[row][col];
+      switch (tileFeedback) {
+        case 'correct':
+          baseScore += SCORING.CORRECT_TILE_SCORE;
+          break;
+        case 'misplaced':
+          baseScore += SCORING.MISPLACED_TILE_SCORE;
+          break;
+        case 'wrong':
+          baseScore += SCORING.WRONG_TILE_SCORE;
+          break;
+        default:
+          // 'none' feedback means no score
+          break;
+      }
+    }
+  }
+
+  return baseScore;
 };
 
 export const calculateScore = (
   puzzle: Puzzle,
   feedback: FeedbackType[][],
-  gameStats: GameStats
+  gameStats: GameStats,
+  guessedRows: Set<number>,
+  guessedCols: Set<number>
 ): ScoreBreakdown => {
   const {
     timeInSeconds,
@@ -97,7 +151,12 @@ export const calculateScore = (
   const isCompleted = feedback.every(row =>
     row.every(cell => cell === 'correct')
   );
-  const baseScore = 0;
+  const baseScore = calculateBaseScore(
+    puzzle,
+    feedback,
+    guessedRows,
+    guessedCols
+  );
 
   const { bonus: timeBonus, multiplier: timeMultiplier } =
     calculateTimeBonuses(timeInSeconds);
@@ -118,7 +177,11 @@ export const calculateScore = (
   );
 
   const subtotal =
-    timeBonus + firstTimeCorrectBonus + perfectAccuracyBonus + efficiencyBonus;
+    baseScore +
+    timeBonus +
+    firstTimeCorrectBonus +
+    perfectAccuracyBonus +
+    efficiencyBonus;
   const totalScore = Math.round(
     subtotal * timeMultiplier * difficultyMultiplier
   );
