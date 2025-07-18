@@ -46,6 +46,53 @@ body,
   gap: 1rem;
 }
 
+/* Shared utility classes */
+.btn-base {
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+}
+
+.btn-base:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.modal-base {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-base {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  max-width: min(400px, 90vw);
+  box-shadow: var(--shadow-medium);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.card-base {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color);
+}
+
 /* Desktop layout container */
 .numbl-desktop-container {
   display: flex;
@@ -570,13 +617,6 @@ body,
   color: white;
   box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
   padding: 0.75rem 1rem;
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-family);
   flex: 1;
 }
 
