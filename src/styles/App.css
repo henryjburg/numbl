@@ -78,12 +78,26 @@ body,
   }
 
   .numbl-desktop-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .numbl-desktop-container > .numbl-header {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .numbl-desktop-container > .numbl-desktop-left-column {
+    display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: center;
     gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
   }
 
   .numbl-desktop-left-column {

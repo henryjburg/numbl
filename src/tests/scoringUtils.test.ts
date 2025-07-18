@@ -1,6 +1,7 @@
 import {
   calculateTimeBonuses,
   calculateCorrectnessMultiplier,
+  calculateDifficultyMultiplier,
   calculateRunningScore,
   calculateScore,
   formatScore,
@@ -81,6 +82,86 @@ describe('scoringUtils', () => {
 
       const result3 = calculateCorrectnessMultiplier(10);
       expect(result3).toBe(2.0);
+    });
+  });
+
+  describe('calculateDifficultyMultiplier', () => {
+    const puzzleWith4Prefilled: Puzzle = {
+      solution: [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 1, 2, 3],
+        [4, 5, 6, 7],
+      ],
+      startingBoard: [
+        [1, null, null, null],
+        [null, 6, null, null],
+        [null, null, 2, null],
+        [null, null, null, 7],
+      ],
+      rowConstraints: [],
+      colConstraints: [],
+      date: '2024-01-01',
+    };
+
+    const puzzleWith2Prefilled: Puzzle = {
+      solution: [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 1, 2, 3],
+        [4, 5, 6, 7],
+      ],
+      startingBoard: [
+        [1, null, null, null],
+        [null, null, null, null],
+        [null, null, 2, null],
+        [null, null, null, null],
+      ],
+      rowConstraints: [],
+      colConstraints: [],
+      date: '2024-01-01',
+    };
+
+    const puzzleWith0Prefilled: Puzzle = {
+      solution: [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 1, 2, 3],
+        [4, 5, 6, 7],
+      ],
+      startingBoard: [
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+      ],
+      rowConstraints: [],
+      colConstraints: [],
+      date: '2024-01-01',
+    };
+
+    test('should calculate difficulty multiplier based on pre-filled cells and correctness', () => {
+      // 4 pre-filled cells (minimum difficulty) + 8 first-time correct cells
+      const result1 = calculateDifficultyMultiplier(puzzleWith4Prefilled, 8);
+      expect(result1).toBe(1.8); // 1.8 * 1.0 = 1.8
+
+      // 2 pre-filled cells (medium difficulty) + 8 first-time correct cells
+      const result2 = calculateDifficultyMultiplier(puzzleWith2Prefilled, 8);
+      expect(result2).toBe(2.7); // 1.8 * 1.5 = 2.7
+
+      // 0 pre-filled cells (maximum difficulty) + 8 first-time correct cells
+      const result3 = calculateDifficultyMultiplier(puzzleWith0Prefilled, 8);
+      expect(result3).toBe(3.6); // 1.8 * 2.0 = 3.6
+    });
+
+    test('should handle edge cases with no first-time correct cells', () => {
+      // 4 pre-filled cells + 0 first-time correct cells
+      const result1 = calculateDifficultyMultiplier(puzzleWith4Prefilled, 0);
+      expect(result1).toBe(1.0); // 1.0 * 1.0 = 1.0
+
+      // 0 pre-filled cells + 0 first-time correct cells
+      const result2 = calculateDifficultyMultiplier(puzzleWith0Prefilled, 0);
+      expect(result2).toBe(2.0); // 1.0 * 2.0 = 2.0
     });
   });
 

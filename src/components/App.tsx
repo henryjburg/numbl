@@ -201,26 +201,38 @@ const App: React.FC = () => {
         <div className="settings-section">
           <h3>🏆 Scoring System</h3>
           <p className="help-text">
-            Score points for correct guesses, with bonuses for speed, accuracy,
-            and efficiency. Try to beat your high score!
+            Bonuses are multiplied by difficulty. Harder puzzles = higher
+            multipliers!
           </p>
           <div className="help-scoring">
             <div className="help-scoring-item">
               <span className="help-scoring-icon">⚡</span>
               <span className="help-scoring-text">
-                Time Bonus: Faster completion = more points
+                Time: 500 points (under 1 min)
               </span>
             </div>
             <div className="help-scoring-item">
               <span className="help-scoring-icon">🎯</span>
               <span className="help-scoring-text">
-                Accuracy Bonus: Fewer wrong guesses = bonus points
+                Perfect: 300 points (no wrong guesses)
               </span>
             </div>
             <div className="help-scoring-item">
               <span className="help-scoring-icon">🚀</span>
               <span className="help-scoring-text">
-                Efficiency Bonus: First-time correct rows/columns
+                Efficiency: 200 points (under 8 guesses)
+              </span>
+            </div>
+            <div className="help-scoring-item">
+              <span className="help-scoring-icon">⭐</span>
+              <span className="help-scoring-text">
+                First-Time: 100 points per correct row/column
+              </span>
+            </div>
+            <div className="help-scoring-item">
+              <span className="help-scoring-icon">📈</span>
+              <span className="help-scoring-text">
+                Multiplier: Based on puzzle difficulty & accuracy
               </span>
             </div>
           </div>
@@ -763,10 +775,14 @@ const App: React.FC = () => {
     setGuessedCols(newGuessedCols);
   };
 
-  const handleNewPuzzle = () => {
-    const newPuzzle = puzzleGenerator.generatePuzzle();
+  const handleRestartDailyPuzzle = () => {
+    // Get today's puzzle to restart the daily game
+    const todaysPuzzle = puzzleGenerator.getTodaysPuzzle();
 
-    setBoard(startingBoardToBoard(newPuzzle.startingBoard));
+    // Clear pending guesses first to prevent Guess button from being enabled
+    setPendingGuesses([]);
+
+    setBoard(startingBoardToBoard(todaysPuzzle.startingBoard));
     setFeedback(
       Array(4)
         .fill(null)
@@ -784,7 +800,6 @@ const App: React.FC = () => {
     );
     setTimer(0);
     setActive(true);
-    setPendingGuesses([]);
     setWinModalOpen(false);
     setShowConfetti(false);
     setIsNewHighScore(false);
@@ -803,7 +818,7 @@ const App: React.FC = () => {
     setGuessedCols(new Set());
     setSelected({ row: 0, col: 0 });
     setIsColumnFocus(false);
-    setPuzzle(newPuzzle);
+    setPuzzle(todaysPuzzle);
   };
 
   const handleNewRandomGame = () => {
@@ -981,28 +996,28 @@ const App: React.FC = () => {
   return (
     <div className="numbl-root">
       <div className="numbl-desktop-container">
-        <div className="numbl-desktop-left-column">
-          <div className="numbl-header">
-            <div className="numbl-title-section">
-              <div className="numbl-header-row">
-                <div className="numbl-title-left">
-                  <img
-                    src={`${process.env.PUBLIC_URL}/numbl-icon.png`}
-                    alt="Numbl"
-                    className="numbl-header-icon"
-                  />
-                  <h1>numbl</h1>
-                </div>
-                <div className="numbl-date">
-                  {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </div>
+        <div className="numbl-header">
+          <div className="numbl-title-section">
+            <div className="numbl-header-row">
+              <div className="numbl-title-left">
+                <img
+                  src={`${process.env.PUBLIC_URL}/numbl-icon.png`}
+                  alt="Numbl"
+                  className="numbl-header-icon"
+                />
+                <h1>numbl</h1>
+              </div>
+              <div className="numbl-date">
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </div>
             </div>
           </div>
+        </div>
+        <div className="numbl-desktop-left-column">
           <div className="numbl-grid-container">
             <div className="numbl-grid">
               {board.map((row, rIdx) =>
@@ -1018,251 +1033,251 @@ const App: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
-        <div className="numbl-desktop-right-column">
-          <div className="numbl-constraints-container">
-            {selected && (
-              <div className="numbl-constraints-section">
-                <div className="numbl-constraint-row">
-                  <span className="numbl-constraint-label">
-                    {isColumnFocus
-                      ? `Column ${selected.col + 1}`
-                      : `Row ${selected.row + 1}`}
-                  </span>
-                  <div
-                    className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, isColumnFocus ? 'col' : 'row', isColumnFocus ? selected.col : selected.row) ? 'guessed-correct' : ''}`}
-                  >
-                    <div className="numbl-constraint-content">
-                      <span className="numbl-constraint-name">
-                        {getConstraintName(
-                          isColumnFocus
-                            ? puzzle.colConstraints[selected.col]
-                            : puzzle.rowConstraints[selected.row]
-                        )}
-                      </span>
-                      {getConstraintValue(
-                        isColumnFocus
-                          ? puzzle.colConstraints[selected.col]
-                          : puzzle.rowConstraints[selected.row]
-                      ) && (
-                        <span
-                          className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
-                        >
-                          {getConstraintValue(
+          <div className="numbl-desktop-right-column">
+            <div className="numbl-constraints-container">
+              {selected && (
+                <div className="numbl-constraints-section">
+                  <div className="numbl-constraint-row">
+                    <span className="numbl-constraint-label">
+                      {isColumnFocus
+                        ? `Column ${selected.col + 1}`
+                        : `Row ${selected.row + 1}`}
+                    </span>
+                    <div
+                      className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, isColumnFocus ? 'col' : 'row', isColumnFocus ? selected.col : selected.row) ? 'guessed-correct' : ''}`}
+                    >
+                      <div className="numbl-constraint-content">
+                        <span className="numbl-constraint-name">
+                          {getConstraintName(
                             isColumnFocus
                               ? puzzle.colConstraints[selected.col]
                               : puzzle.rowConstraints[selected.row]
                           )}
                         </span>
-                      )}
+                        {getConstraintValue(
+                          isColumnFocus
+                            ? puzzle.colConstraints[selected.col]
+                            : puzzle.rowConstraints[selected.row]
+                        ) && (
+                          <span
+                            className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
+                          >
+                            {getConstraintValue(
+                              isColumnFocus
+                                ? puzzle.colConstraints[selected.col]
+                                : puzzle.rowConstraints[selected.row]
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        className="numbl-constraint-info-btn"
+                        onMouseEnter={e =>
+                          handleConstraintInfoShow(
+                            e,
+                            isColumnFocus
+                              ? puzzle.colConstraints[selected.col]
+                              : puzzle.rowConstraints[selected.row],
+                            isColumnFocus ? 'col' : 'row'
+                          )
+                        }
+                        onMouseLeave={handleConstraintInfoHide}
+                        onClick={e =>
+                          handleConstraintInfoShow(
+                            e,
+                            isColumnFocus
+                              ? puzzle.colConstraints[selected.col]
+                              : puzzle.rowConstraints[selected.row],
+                            isColumnFocus ? 'col' : 'row'
+                          )
+                        }
+                        aria-label="Constraint information"
+                      >
+                        {/* SVG info icon */}
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="8"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            fill="none"
+                          />
+                          <rect
+                            x="9"
+                            y="8"
+                            width="2"
+                            height="6"
+                            rx="1"
+                            fill="currentColor"
+                          />
+                          <circle cx="10" cy="6" r="1.2" fill="currentColor" />
+                        </svg>
+                        {constraintTooltipVisible && (
+                          <div className="numbl-constraint-tooltip">
+                            {constraintTooltipText}
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="numbl-inputs">
+              {keyboardPosition === 'left' ? (
+                <>
+                  <div className="numbl-keyboard-container">
+                    <div className="numbl-keyboard-grid">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                        <button
+                          key={n}
+                          className="numbl-num-btn"
+                          onClick={() => handleNumberInput(String(n))}
+                        >
+                          {n}
+                        </button>
+                      ))}
                     </div>
                     <button
-                      className="numbl-constraint-info-btn"
-                      onMouseEnter={e =>
-                        handleConstraintInfoShow(
-                          e,
-                          isColumnFocus
-                            ? puzzle.colConstraints[selected.col]
-                            : puzzle.rowConstraints[selected.row],
-                          isColumnFocus ? 'col' : 'row'
+                      className="numbl-guess-btn"
+                      onClick={handleGuess}
+                      disabled={
+                        pendingGuesses.length === 0 ||
+                        duplicates.size > 0 ||
+                        pendingGuesses.some(guess =>
+                          hasDuplicatesInLine(board, guess.mode, guess.index)
                         )
                       }
-                      onMouseLeave={handleConstraintInfoHide}
-                      onClick={e =>
-                        handleConstraintInfoShow(
-                          e,
-                          isColumnFocus
-                            ? puzzle.colConstraints[selected.col]
-                            : puzzle.rowConstraints[selected.row],
-                          isColumnFocus ? 'col' : 'row'
-                        )
-                      }
-                      aria-label="Constraint information"
                     >
-                      {/* SVG info icon */}
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                      Guess
+                    </button>
+                  </div>
+                  <div className="numbl-inputs-left">
+                    <div className="numbl-timer">
+                      <span className="stat-label">Time</span>
+                      {formatTime(timer)}
+                    </div>
+                    <div
+                      className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
+                    >
+                      <span className="stat-label">Score</span>
+                      {formatScore(currentScore)}
+                    </div>
+                    <button
+                      className="numbl-new-game-btn"
+                      onClick={handleNewRandomGame}
+                    >
+                      New Game
+                    </button>
+                    <div className="numbl-utility-buttons">
+                      <button
+                        className="numbl-settings-btn"
+                        onClick={handleHelpOpen}
                       >
-                        <circle
-                          cx="10"
-                          cy="10"
-                          r="8"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
+                        How to Play
+                      </button>
+                      <button
+                        className="numbl-settings-icon-btn"
+                        onClick={() => setSettingsModalOpen(true)}
+                        aria-label="Settings"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
                           fill="none"
-                        />
-                        <rect
-                          x="9"
-                          y="8"
-                          width="2"
-                          height="6"
-                          rx="1"
-                          fill="currentColor"
-                        />
-                        <circle cx="10" cy="6" r="1.2" fill="currentColor" />
-                      </svg>
-                      {constraintTooltipVisible && (
-                        <div className="numbl-constraint-tooltip">
-                          {constraintTooltipText}
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="numbl-inputs">
-            {keyboardPosition === 'left' ? (
-              <>
-                <div className="numbl-keyboard-container">
-                  <div className="numbl-keyboard-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                      <button
-                        key={n}
-                        className="numbl-num-btn"
-                        onClick={() => handleNumberInput(String(n))}
-                      >
-                        {n}
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle cx="12" cy="6" r="2" fill="currentColor" />
+                          <circle cx="12" cy="12" r="2" fill="currentColor" />
+                          <circle cx="12" cy="18" r="2" fill="currentColor" />
+                        </svg>
                       </button>
-                    ))}
+                    </div>
                   </div>
-                  <button
-                    className="numbl-guess-btn"
-                    onClick={handleGuess}
-                    disabled={
-                      pendingGuesses.length === 0 ||
-                      duplicates.size > 0 ||
-                      pendingGuesses.some(guess =>
-                        hasDuplicatesInLine(board, guess.mode, guess.index)
-                      )
-                    }
-                  >
-                    Guess
-                  </button>
-                </div>
-                <div className="numbl-inputs-left">
-                  <div className="numbl-timer">
-                    <span className="stat-label">Time</span>
-                    {formatTime(timer)}
-                  </div>
-                  <div
-                    className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
-                  >
-                    <span className="stat-label">Score</span>
-                    {formatScore(currentScore)}
-                  </div>
-                  <button
-                    className="numbl-new-game-btn"
-                    onClick={handleNewRandomGame}
-                  >
-                    New Game
-                  </button>
-                  <div className="numbl-utility-buttons">
-                    <button
-                      className="numbl-settings-btn"
-                      onClick={handleHelpOpen}
+                </>
+              ) : (
+                <>
+                  <div className="numbl-inputs-left">
+                    <div className="numbl-timer">
+                      <span className="stat-label">Time</span>
+                      {formatTime(timer)}
+                    </div>
+                    <div
+                      className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
                     >
-                      How to Play
-                    </button>
+                      <span className="stat-label">Score</span>
+                      {formatScore(currentScore)}
+                    </div>
                     <button
-                      className="numbl-settings-icon-btn"
-                      onClick={() => setSettingsModalOpen(true)}
-                      aria-label="Settings"
+                      className="numbl-new-game-btn"
+                      onClick={handleNewRandomGame}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle cx="12" cy="6" r="2" fill="currentColor" />
-                        <circle cx="12" cy="12" r="2" fill="currentColor" />
-                        <circle cx="12" cy="18" r="2" fill="currentColor" />
-                      </svg>
+                      New Game
                     </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="numbl-inputs-left">
-                  <div className="numbl-timer">
-                    <span className="stat-label">Time</span>
-                    {formatTime(timer)}
-                  </div>
-                  <div
-                    className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}
-                  >
-                    <span className="stat-label">Score</span>
-                    {formatScore(currentScore)}
-                  </div>
-                  <button
-                    className="numbl-new-game-btn"
-                    onClick={handleNewRandomGame}
-                  >
-                    New Game
-                  </button>
-                  <div className="numbl-utility-buttons">
-                    <button
-                      className="numbl-settings-btn"
-                      onClick={handleHelpOpen}
-                    >
-                      How to Play
-                    </button>
-                    <button
-                      className="numbl-settings-icon-btn"
-                      onClick={() => setSettingsModalOpen(true)}
-                      aria-label="Settings"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle cx="12" cy="6" r="2" fill="currentColor" />
-                        <circle cx="12" cy="12" r="2" fill="currentColor" />
-                        <circle cx="12" cy="18" r="2" fill="currentColor" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="numbl-keyboard-container">
-                  <div className="numbl-keyboard-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                    <div className="numbl-utility-buttons">
                       <button
-                        key={n}
-                        className="numbl-num-btn"
-                        onClick={() => handleNumberInput(String(n))}
+                        className="numbl-settings-btn"
+                        onClick={handleHelpOpen}
                       >
-                        {n}
+                        How to Play
                       </button>
-                    ))}
+                      <button
+                        className="numbl-settings-icon-btn"
+                        onClick={() => setSettingsModalOpen(true)}
+                        aria-label="Settings"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle cx="12" cy="6" r="2" fill="currentColor" />
+                          <circle cx="12" cy="12" r="2" fill="currentColor" />
+                          <circle cx="12" cy="18" r="2" fill="currentColor" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="numbl-guess-btn"
-                    onClick={handleGuess}
-                    disabled={
-                      pendingGuesses.length === 0 ||
-                      duplicates.size > 0 ||
-                      pendingGuesses.some(guess =>
-                        hasDuplicatesInLine(board, guess.mode, guess.index)
-                      )
-                    }
-                  >
-                    Guess
-                  </button>
-                </div>
-              </>
-            )}
+                  <div className="numbl-keyboard-container">
+                    <div className="numbl-keyboard-grid">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                        <button
+                          key={n}
+                          className="numbl-num-btn"
+                          onClick={() => handleNumberInput(String(n))}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      className="numbl-guess-btn"
+                      onClick={handleGuess}
+                      disabled={
+                        pendingGuesses.length === 0 ||
+                        duplicates.size > 0 ||
+                        pendingGuesses.some(guess =>
+                          hasDuplicatesInLine(board, guess.mode, guess.index)
+                        )
+                      }
+                    >
+                      Guess
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1359,7 +1374,7 @@ const App: React.FC = () => {
                           <span>
                             {scoreBreakdown.difficultyMultiplier > 1.0 ? (
                               <span className="multiplier">
-                                Correctness:{' '}
+                                Difficulty:{' '}
                                 {scoreBreakdown.difficultyMultiplier.toFixed(1)}
                                 x
                               </span>
@@ -1397,7 +1412,7 @@ const App: React.FC = () => {
                 className="win-modal-btn secondary"
                 onClick={() => {
                   setWinModalOpen(false);
-                  handleNewPuzzle();
+                  handleRestartDailyPuzzle();
                 }}
               >
                 Play Again

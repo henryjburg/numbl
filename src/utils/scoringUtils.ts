@@ -49,6 +49,33 @@ export const calculateCorrectnessMultiplier = (
   );
 };
 
+export const calculateDifficultyMultiplier = (
+  puzzle: Puzzle,
+  firstTimeCorrectCells: number
+): number => {
+  // Count pre-filled cells
+  let preFilledCount = 0;
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      if (puzzle.startingBoard[row][col] !== null) {
+        preFilledCount++;
+      }
+    }
+  }
+
+  // Calculate difficulty multiplier based on pre-filled cells
+  // Maximum of 4 pre-filled cells = minimum difficulty (1.0)
+  // Minimum of 0 pre-filled cells = maximum difficulty (2.0)
+  const preFilledDifficultyMultiplier = 2.0 - preFilledCount / 4.0;
+
+  // Combine with correctness multiplier
+  const correctnessMultiplier = calculateCorrectnessMultiplier(
+    firstTimeCorrectCells
+  );
+
+  return correctnessMultiplier * preFilledDifficultyMultiplier;
+};
+
 export const calculateRunningScore = (
   puzzle: Puzzle,
   feedback: FeedbackType[][],
@@ -97,14 +124,15 @@ export const calculateScore = (
       ? SCORING.EFFICIENCY_BONUS
       : 0;
 
-  const correctnessMultiplier = calculateCorrectnessMultiplier(
+  const difficultyMultiplier = calculateDifficultyMultiplier(
+    puzzle,
     firstTimeCorrectCells
   );
 
   const subtotal =
     timeBonus + firstTimeCorrectBonus + perfectAccuracyBonus + efficiencyBonus;
   const totalScore = Math.round(
-    subtotal * timeMultiplier * correctnessMultiplier
+    subtotal * timeMultiplier * difficultyMultiplier
   );
 
   return {
@@ -114,7 +142,7 @@ export const calculateScore = (
     firstTimeCorrectBonus,
     perfectAccuracyBonus,
     efficiencyBonus,
-    difficultyMultiplier: correctnessMultiplier,
+    difficultyMultiplier,
     totalScore,
   };
 };
