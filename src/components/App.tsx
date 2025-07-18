@@ -697,169 +697,173 @@ const App: React.FC = () => {
     <div className="numbl-root">
       <div className="numbl-header">
         <div className="numbl-title-section">
-          <h1>numbl</h1>
-          <div className="numbl-date">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
-        </div>
-        <div className="numbl-stats">
-          <div className="numbl-timer">
-            <span className="emoji" role="img" aria-label="timer">
-              ⏰
-            </span>{' '}
-            {formatTime(timer)}
-          </div>
-          <div className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}>
-            <span className="emoji" role="img" aria-label="trophy">
-              🏆
-            </span>{' '}
-            {formatScore(currentScore)}
+          <div className="numbl-header-row">
+            <div className="numbl-title-left">
+              <img
+                src={`${process.env.PUBLIC_URL}/numbl-icon.png`}
+                alt="Numbl"
+                className="numbl-header-icon"
+              />
+              <h1>numbl</h1>
+            </div>
+            <div className="numbl-date">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </div>
           </div>
         </div>
       </div>
+      <div className="numbl-grid-container">
+        <div className="numbl-grid">
+          {board.map((row, rIdx) =>
+            row.map((cell, cIdx) => (
+              <div
+                key={`${rIdx}-${cIdx}`}
+                className={`numbl-cell${selected && selected.row === rIdx && selected.col === cIdx ? ' selected' : ''} ${feedback[rIdx][cIdx] !== 'none' ? `feedback-${feedback[rIdx][cIdx]}` : ''} ${feedback[rIdx][cIdx] === 'misplaced' && arrowDirections[rIdx][cIdx] === 'right' ? ' arrow-right' : ''} ${duplicates.has(`${rIdx},${cIdx}`) ? 'duplicate' : ''} ${feedback[rIdx][cIdx] === 'correct' ? 'locked' : ''} ${isPreFilledCell(rIdx, cIdx) ? 'pre-filled' : ''} ${selected && ((!isColumnFocus && rIdx === selected.row) || (isColumnFocus && cIdx === selected.col)) && !isPreFilledCell(rIdx, cIdx) ? 'focus-highlight' : ''}`}
+                onClick={() => handleCellClick(rIdx, cIdx)}
+              >
+                {cell}
+              </div>
+            ))
+          )}
+        </div>
+        <div className="numbl-puzzle-id">Today's Puzzle</div>
+      </div>
       <div className="numbl-constraints-container">
         {selected && (
-          <div className="numbl-constraints-grid">
-            <div
-              className={`numbl-constraints-section ${!isColumnFocus ? 'focused' : ''}`}
-              onClick={handleRowConstraintClick}
-            >
-              <h3>Row {selected.row + 1}</h3>
-              <div className="numbl-constraints-list">
-                <div className="numbl-constraint-item">
-                  <div
-                    className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, 'row', selected.row) ? 'guessed-correct' : ''}`}
+          <div className="numbl-constraints-section">
+            <div className="numbl-constraint-row">
+              <span className="numbl-constraint-label">
+                {isColumnFocus
+                  ? `Column ${selected.col + 1}`
+                  : `Row ${selected.row + 1}`}
+              </span>
+              <div
+                className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, isColumnFocus ? 'col' : 'row', isColumnFocus ? selected.col : selected.row) ? 'guessed-correct' : ''}`}
+              >
+                <span className="numbl-constraint-name">
+                  {getConstraintName(
+                    isColumnFocus
+                      ? puzzle.colConstraints[selected.col]
+                      : puzzle.rowConstraints[selected.row]
+                  )}
+                </span>
+                {getConstraintValue(
+                  isColumnFocus
+                    ? puzzle.colConstraints[selected.col]
+                    : puzzle.rowConstraints[selected.row]
+                ) && (
+                  <span
+                    className={`numbl-constraint-value constraint-${getConstraintType(isColumnFocus ? puzzle.colConstraints[selected.col] : puzzle.rowConstraints[selected.row])}`}
                   >
-                    <span className="numbl-constraint-name">
-                      {getConstraintName(puzzle.rowConstraints[selected.row])}
-                    </span>
                     {getConstraintValue(
-                      puzzle.rowConstraints[selected.row]
-                    ) && (
-                      <span
-                        className={`numbl-constraint-value constraint-${getConstraintType(puzzle.rowConstraints[selected.row])}`}
-                      >
-                        {getConstraintValue(
-                          puzzle.rowConstraints[selected.row]
-                        )}
-                      </span>
+                      isColumnFocus
+                        ? puzzle.colConstraints[selected.col]
+                        : puzzle.rowConstraints[selected.row]
                     )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              className={`numbl-constraints-section ${isColumnFocus ? 'focused' : ''}`}
-              onClick={handleColumnConstraintClick}
-            >
-              <h3>Column {selected.col + 1}</h3>
-              <div className="numbl-constraints-list">
-                <div className="numbl-constraint-item">
-                  <div
-                    className={`numbl-constraint-display ${isConstraintGuessedCorrect(feedback, 'col', selected.col) ? 'guessed-correct' : ''}`}
-                  >
-                    <span className="numbl-constraint-name">
-                      {getConstraintName(puzzle.colConstraints[selected.col])}
-                    </span>
-                    {getConstraintValue(
-                      puzzle.colConstraints[selected.col]
-                    ) && (
-                      <span
-                        className={`numbl-constraint-value constraint-${getConstraintType(puzzle.colConstraints[selected.col])}`}
-                      >
-                        {getConstraintValue(
-                          puzzle.colConstraints[selected.col]
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  </span>
+                )}
               </div>
             </div>
           </div>
         )}
-      </div>
-      <div className="numbl-grid-container">
-        <table className="numbl-grid">
-          <tbody>
-            {board.map((row, rIdx) => (
-              <tr key={rIdx}>
-                {row.map((cell, cIdx) => (
-                  <td
-                    key={cIdx}
-                    className={`numbl-cell${selected && selected.row === rIdx && selected.col === cIdx ? ' selected' : ''} ${feedback[rIdx][cIdx] !== 'none' ? `feedback-${feedback[rIdx][cIdx]}` : ''} ${feedback[rIdx][cIdx] === 'misplaced' && arrowDirections[rIdx][cIdx] === 'right' ? ' arrow-right' : ''} ${duplicates.has(`${rIdx},${cIdx}`) ? 'duplicate' : ''} ${feedback[rIdx][cIdx] === 'correct' ? 'locked' : ''} ${isPreFilledCell(rIdx, cIdx) ? 'pre-filled' : ''} ${selected && ((!isColumnFocus && rIdx === selected.row) || (isColumnFocus && cIdx === selected.col)) && !isPreFilledCell(rIdx, cIdx) ? 'focus-highlight' : ''}`}
-                    onClick={() => handleCellClick(rIdx, cIdx)}
-                  >
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="numbl-puzzle-id">Today's Puzzle</div>
       </div>
       <div className="numbl-inputs">
         {keyboardPosition === 'left' ? (
           <>
-            <div className="numbl-keyboard-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                <button
-                  key={n}
-                  className="numbl-num-btn"
-                  onClick={() => handleNumberInput(String(n))}
-                >
-                  {n}
-                </button>
-              ))}
+            <div className="numbl-keyboard-container">
+              <div className="numbl-keyboard-grid">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                  <button
+                    key={n}
+                    className="numbl-num-btn"
+                    onClick={() => handleNumberInput(String(n))}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="numbl-guess-btn"
+                onClick={handleGuess}
+                disabled={
+                  pendingGuesses.length === 0 ||
+                  duplicates.size > 0 ||
+                  pendingGuesses.some(guess =>
+                    hasDuplicatesInLine(board, guess.mode, guess.index)
+                  )
+                }
+              >
+                Guess
+              </button>
             </div>
-            <button
-              className="numbl-settings-btn"
-              onClick={() => setSettingsModalOpen(true)}
-            >
-              Settings
-            </button>
+            <div className="numbl-inputs-left">
+              <div className="numbl-timer">
+                <span className="stat-label">Time</span>
+                {formatTime(timer)}
+              </div>
+              <div className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}>
+                <span className="stat-label">Score</span>
+                {formatScore(currentScore)}
+              </div>
+              <button
+                className="numbl-settings-btn"
+                onClick={() => setSettingsModalOpen(true)}
+              >
+                Settings
+              </button>
+            </div>
           </>
         ) : (
           <>
-            <button
-              className="numbl-settings-btn"
-              onClick={() => setSettingsModalOpen(true)}
-            >
-              Settings
-            </button>
-            <div className="numbl-keyboard-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                <button
-                  key={n}
-                  className="numbl-num-btn"
-                  onClick={() => handleNumberInput(String(n))}
-                >
-                  {n}
-                </button>
-              ))}
+            <div className="numbl-inputs-left">
+              <div className="numbl-timer">
+                <span className="stat-label">Time</span>
+                {formatTime(timer)}
+              </div>
+              <div className={`numbl-score ${scoreVibrate ? 'vibrate' : ''}`}>
+                <span className="stat-label">Score</span>
+                {formatScore(currentScore)}
+              </div>
+              <button
+                className="numbl-settings-btn"
+                onClick={() => setSettingsModalOpen(true)}
+              >
+                Settings
+              </button>
+            </div>
+            <div className="numbl-keyboard-container">
+              <div className="numbl-keyboard-grid">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                  <button
+                    key={n}
+                    className="numbl-num-btn"
+                    onClick={() => handleNumberInput(String(n))}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="numbl-guess-btn"
+                onClick={handleGuess}
+                disabled={
+                  pendingGuesses.length === 0 ||
+                  duplicates.size > 0 ||
+                  pendingGuesses.some(guess =>
+                    hasDuplicatesInLine(board, guess.mode, guess.index)
+                  )
+                }
+              >
+                Guess
+              </button>
             </div>
           </>
         )}
       </div>
-      <button
-        className="numbl-guess-btn"
-        onClick={handleGuess}
-        disabled={
-          pendingGuesses.length === 0 ||
-          duplicates.size > 0 ||
-          pendingGuesses.some(guess =>
-            hasDuplicatesInLine(board, guess.mode, guess.index)
-          )
-        }
-      >
-        Guess
-      </button>
 
       {showConfetti && (
         <div className="confetti-container">
