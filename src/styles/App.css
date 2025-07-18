@@ -453,7 +453,8 @@ body,
 
 /* Buttons */
 .numbl-guess-btn,
-.numbl-settings-btn {
+.numbl-settings-btn,
+.numbl-new-game-btn {
   width: 100%;
   padding: 0.75rem;
   border: none;
@@ -486,12 +487,33 @@ body,
   background: var(--primary-color);
   color: white;
   box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  flex: 1;
 }
 
 .numbl-settings-btn:hover {
   background: #7a6b4a;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+}
+
+.numbl-new-game-btn {
+  background: var(--secondary-color);
+  color: white;
+  box-shadow: 0 2px 8px rgba(160, 139, 107, 0.2);
+}
+
+.numbl-new-game-btn:hover {
+  background: #8b7a5a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(160, 139, 107, 0.3);
 }
 
 /* Modals */
@@ -1091,4 +1113,38 @@ body,
   font-size: 0.95rem;
   line-height: 1.5;
   margin: 0;
+}
+
+.numbl-utility-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.numbl-settings-icon-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
+}
+
+.numbl-settings-icon-btn:hover {
+  background: #7a6b4a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+}
+
+.numbl-settings-icon-btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
 }

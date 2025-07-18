@@ -442,20 +442,32 @@ const App: React.FC = () => {
         [];
 
       for (let row = 0; row < 4; row++) {
+        // Count pre-filled cells in this row
+        const preFilledCount = currentBoard[row].filter(
+          (cell, col) => puzzle.startingBoard[row][col] !== null
+        ).length;
+
         if (
           currentBoard[row].every(cell => cell) &&
           !isConstraintGuessedCorrect(feedbackToUse, 'row', row) &&
-          !guessedRows.has(row)
+          !guessedRows.has(row) &&
+          preFilledCount < 4 // Don't allow guessing if row has 4 pre-filled cells
         ) {
           newPendingGuesses.push({ mode: 'row', index: row });
         }
       }
 
       for (let col = 0; col < 4; col++) {
+        // Count pre-filled cells in this column
+        const preFilledCount = currentBoard.filter(
+          (_, row) => puzzle.startingBoard[row][col] !== null
+        ).length;
+
         if (
           currentBoard.every(r => r[col]) &&
           !isConstraintGuessedCorrect(feedbackToUse, 'col', col) &&
-          !guessedCols.has(col)
+          !guessedCols.has(col) &&
+          preFilledCount < 4 // Don't allow guessing if column has 4 pre-filled cells
         ) {
           newPendingGuesses.push({ mode: 'col', index: col });
         }
@@ -463,7 +475,7 @@ const App: React.FC = () => {
 
       setPendingGuesses(newPendingGuesses);
     },
-    [feedback, guessedRows, guessedCols]
+    [feedback, guessedRows, guessedCols, puzzle.startingBoard]
   );
 
   useEffect(() => {
@@ -752,7 +764,7 @@ const App: React.FC = () => {
   };
 
   const handleNewPuzzle = () => {
-    const newPuzzle = puzzleGenerator.getTodaysPuzzle();
+    const newPuzzle = puzzleGenerator.generatePuzzle();
 
     setBoard(startingBoardToBoard(newPuzzle.startingBoard));
     setFeedback(
@@ -773,6 +785,57 @@ const App: React.FC = () => {
     setTimer(0);
     setActive(true);
     setPendingGuesses([]);
+    setWinModalOpen(false);
+    setShowConfetti(false);
+    setIsNewHighScore(false);
+    setGameStats({
+      totalGuesses: 0,
+      correctGuesses: 0,
+      wrongGuesses: 0,
+      firstTimeCorrectRows: 0,
+      firstTimeCorrectCols: 0,
+      firstTimeCorrectCells: 0,
+      timeInSeconds: 0,
+    });
+    setScoreBreakdown(null);
+    setCurrentScore(0);
+    setGuessedRows(new Set());
+    setGuessedCols(new Set());
+    setSelected({ row: 0, col: 0 });
+    setIsColumnFocus(false);
+    setPuzzle(newPuzzle);
+  };
+
+  const handleNewRandomGame = () => {
+    // Generate a random date to create a different puzzle
+    const randomDate = new Date(
+      Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000
+    )
+      .toISOString()
+      .split('T')[0];
+    const newPuzzle = puzzleGenerator.generatePuzzle(randomDate);
+
+    // Clear pending guesses first to prevent Guess button from being enabled
+    setPendingGuesses([]);
+
+    setBoard(startingBoardToBoard(newPuzzle.startingBoard));
+    setFeedback(
+      Array(4)
+        .fill(null)
+        .map(() => Array(4).fill('none'))
+    );
+    setFeedbackNumbers(
+      Array(4)
+        .fill(null)
+        .map(() => Array(4).fill(''))
+    );
+    setArrowDirections(
+      Array(4)
+        .fill(null)
+        .map(() => Array(4).fill(null))
+    );
+    setTimer(0);
+    setActive(true);
     setWinModalOpen(false);
     setShowConfetti(false);
     setIsNewHighScore(false);
@@ -1089,17 +1152,33 @@ const App: React.FC = () => {
                 {formatScore(currentScore)}
               </div>
               <button
-                className="numbl-settings-btn"
-                onClick={() => setSettingsModalOpen(true)}
+                className="numbl-new-game-btn"
+                onClick={handleNewRandomGame}
               >
-                Settings
+                New Game
               </button>
-              <button
-                className="numbl-settings-btn"
-                onClick={() => setHelpModalOpen(true)}
-              >
-                How to Play
-              </button>
+              <div className="numbl-utility-buttons">
+                <button className="numbl-settings-btn" onClick={handleHelpOpen}>
+                  How to Play
+                </button>
+                <button
+                  className="numbl-settings-icon-btn"
+                  onClick={() => setSettingsModalOpen(true)}
+                  aria-label="Settings"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="12" cy="6" r="2" fill="currentColor" />
+                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                    <circle cx="12" cy="18" r="2" fill="currentColor" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </>
         ) : (
@@ -1114,14 +1193,33 @@ const App: React.FC = () => {
                 {formatScore(currentScore)}
               </div>
               <button
-                className="numbl-settings-btn"
-                onClick={() => setSettingsModalOpen(true)}
+                className="numbl-new-game-btn"
+                onClick={handleNewRandomGame}
               >
-                Settings
+                New Game
               </button>
-              <button className="numbl-settings-btn" onClick={handleHelpOpen}>
-                How to Play
-              </button>
+              <div className="numbl-utility-buttons">
+                <button className="numbl-settings-btn" onClick={handleHelpOpen}>
+                  How to Play
+                </button>
+                <button
+                  className="numbl-settings-icon-btn"
+                  onClick={() => setSettingsModalOpen(true)}
+                  aria-label="Settings"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="12" cy="6" r="2" fill="currentColor" />
+                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                    <circle cx="12" cy="18" r="2" fill="currentColor" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div className="numbl-keyboard-container">
               <div className="numbl-keyboard-grid">
