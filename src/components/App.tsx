@@ -918,7 +918,7 @@ const App: React.FC = () => {
       finalScore = Math.round(scoreBeforeMultipliers * totalMultiplier);
     }
 
-    const shareText = `I finished today's numbl in ${formatTime(timer)} with ${formatScore(finalScore)} points!\n\nTry and beat me: https://numbl.net`;
+    const shareText = `I finished ${isDailyPuzzle ? "today's" : 'a'} numbl in ${formatTime(timer)} with ${formatScore(finalScore)} points!\n\nTry and beat me: https://numbl.net`;
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareText).catch(err => {
