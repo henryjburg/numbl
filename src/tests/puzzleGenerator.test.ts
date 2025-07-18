@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 import { PuzzleGenerator } from '../utils/puzzleGenerator';
 
 function getConstraintType(constraint: any): string {
@@ -176,7 +177,7 @@ describe('PuzzleGenerator', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
     puzzle.rowConstraints.forEach((constraint, rowIndex) => {
-      if (constraint.sum) {
+      if (constraint.sum !== undefined) {
         const rowSum = puzzle.solution[rowIndex].reduce(
           (sum, cell) => sum + cell,
           0
@@ -186,7 +187,7 @@ describe('PuzzleGenerator', () => {
     });
 
     puzzle.colConstraints.forEach((constraint, colIndex) => {
-      if (constraint.sum) {
+      if (constraint.sum !== undefined) {
         const colSum = puzzle.solution.reduce(
           (sum, row) => sum + row[colIndex],
           0

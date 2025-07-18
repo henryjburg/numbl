@@ -7,7 +7,7 @@ import {
 } from '../utils/puzzleUtils';
 import { calculateScore, calculateRunningScore } from '../utils/scoringUtils';
 import { formatTime } from '../utils/timeUtils';
-import { Puzzle, FeedbackType, GameStats, Constraint } from '../types/puzzle';
+import { Puzzle, FeedbackType, GameStats } from '../types/puzzle';
 
 describe('Core Functionality Tests', () => {
   const mockPuzzle: Puzzle = {

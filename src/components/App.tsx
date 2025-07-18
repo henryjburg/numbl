@@ -65,7 +65,7 @@ const App: React.FC = () => {
   const [debugMode, setDebugMode] = useState(false);
   const [winModalOpen, setWinModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('hard');
+  const [difficulty] = useState<'easy' | 'hard'>('hard');
   const [keyboardPosition, setKeyboardPosition] = useState<'left' | 'right'>(
     () => {
       const saved = localStorage.getItem('numbl-keyboard-position');
@@ -128,6 +128,7 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [active]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!active || e.repeat) return;
@@ -249,6 +250,7 @@ const App: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selected,
     active,
@@ -261,6 +263,7 @@ const App: React.FC = () => {
     isColumnFocus,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkForGuessingEligibility(board);
   }, [board, feedback]);
@@ -276,7 +279,7 @@ const App: React.FC = () => {
 
       setCurrentScore(runningScore);
     }
-  }, [gameStats, feedback, puzzle, active]);
+  }, [gameStats, feedback, puzzle, active, currentScore]);
 
   useEffect(() => {
     if (active && isPuzzleComplete(feedback)) {
@@ -303,7 +306,7 @@ const App: React.FC = () => {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
     }
-  }, [feedback, active, gameStats, timer, puzzle]);
+  }, [feedback, active, gameStats, timer, puzzle, highScore]);
 
   const checkForGuessingEligibility = (
     currentBoard: string[][],
@@ -638,6 +641,7 @@ const App: React.FC = () => {
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareText).catch(err => {
+        // eslint-disable-next-line no-console
         console.error('Failed to copy: ', err);
         const textArea = document.createElement('textarea');
         textArea.value = shareText;
