@@ -1,5 +1,7 @@
 # numbl 🧮
 
+![numbl game screenshot](screenshot.png)
+
 A daily number puzzle game where you fill a 4x4 grid to match mathematical constraints. Think Wordle, but a Sudoku influence!
 
 ## 🎮 How to Play
