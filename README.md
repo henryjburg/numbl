@@ -117,3 +117,17 @@ src/
 - `npm start` - Run development server
 - `npm test` - Run tests
 - `npm run build` - Build for production
+- `npm run lint` - Check for linting errors
+- `npm run lint:fix` - Fix auto-fixable linting errors
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check if code is properly formatted
+
+### Code Quality
+
+This project uses ESLint and Prettier for code quality and formatting:
+
+- **ESLint**: Catches potential errors and enforces coding standards
+- **Prettier**: Ensures consistent code formatting
+- **TypeScript**: Provides type safety and better developer experience
+
+The linting configuration is set up to work with VS Code - install the ESLint and Prettier extensions for the best experience.

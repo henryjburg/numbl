@@ -1,146 +1,72 @@
-import { puzzleGenerator } from '../utils/puzzleGenerator';
+import { PuzzleGenerator } from '../utils/puzzleGenerator';
 
 // Helper function to get constraint type
 function getConstraintType(constraint: any): string {
   if (constraint.sum !== undefined) return 'sum';
-  if (constraint.onlyOdd) return 'odds';
-  if (constraint.onlyEven) return 'evens';
-  if (constraint.range) return 'range';
+  if (constraint.even === true) return 'even';
+  if (constraint.even === false) return 'odd';
   if (constraint.contains) return 'contains';
-  if (constraint.order) return 'order';
-  if (constraint.consecutive) return 'consecutive';
-  if (constraint.fibonacci) return 'fibonacci';
-  if (constraint.prime) return 'prime';
-  if (constraint.square) return 'square';
-  if (constraint.unique) return 'unique';
+  if (constraint.range) return 'range';
   return 'unknown';
 }
 
 describe('PuzzleGenerator', () => {
-  test('should not have more than 2 occurrences of the same constraint type', () => {
-    const puzzle = puzzleGenerator.generatePuzzle();
+  let puzzleGenerator: PuzzleGenerator;
 
-    // Collect all constraints
-    const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
-
-    // Count constraint types
-    const constraintCounts: { [key: string]: number } = {};
-
-    allConstraints.forEach(constraint => {
-      const type = getConstraintType(constraint);
-      constraintCounts[type] = (constraintCounts[type] || 0) + 1;
-    });
-
-    // Check if any constraint appears more than 2 times
-    const hasTooMany = Object.values(constraintCounts).some(count => count > 2);
-
-    expect(hasTooMany).toBe(false);
+  beforeEach(() => {
+    puzzleGenerator = new PuzzleGenerator();
   });
 
-  test('should have exactly 2 sum constraints', () => {
-    const puzzle = puzzleGenerator.generatePuzzle();
-
-    // Collect all constraints
-    const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
-
-    // Count sum constraints
-    const sumConstraints = allConstraints.filter(constraint => constraint.sum !== undefined);
-
-    expect(sumConstraints.length).toBe(2);
-  });
-
-  test('should maintain constraint distribution limit across multiple dates', () => {
-    const dates = ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'];
-
-    dates.forEach(date => {
-      const puzzle = puzzleGenerator.generatePuzzle(date);
-      const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
-
-      const constraintCounts: { [key: string]: number } = {};
-      allConstraints.forEach(constraint => {
-        const type = getConstraintType(constraint);
-        constraintCounts[type] = (constraintCounts[type] || 0) + 1;
-      });
-
-      const hasTooMany = Object.values(constraintCounts).some(count => count > 2);
-      expect(hasTooMany).toBe(false);
-    });
-  });
-
-    test('should have exactly 2 sum constraints across multiple dates', () => {
-    const dates = ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'];
-
-    dates.forEach(date => {
-      const puzzle = puzzleGenerator.generatePuzzle(date);
-      const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
-
-      // Count sum constraints
-      const sumConstraints = allConstraints.filter(constraint => constraint.sum !== undefined);
-
-      expect(sumConstraints.length).toBe(2);
-    });
-  });
-
-  test('should have exactly 4 pre-filled cells in starting board', () => {
+  test('should have 4-5 pre-filled cells in starting board', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
     // Count pre-filled cells (non-null values)
-    const preFilledCells = puzzle.startingBoard.flat().filter(cell => cell !== null);
+    const preFilledCells = puzzle.startingBoard
+      .flat()
+      .filter(cell => cell !== null);
 
-    expect(preFilledCells.length).toBe(4);
+    expect(preFilledCells.length).toBeGreaterThanOrEqual(4);
+    expect(preFilledCells.length).toBeLessThanOrEqual(5);
   });
 
-      test('should have exactly 4 pre-filled cells across multiple dates', () => {
-    const dates = ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'];
-
-    dates.forEach(date => {
-      const puzzle = puzzleGenerator.generatePuzzle(date);
-
-      // Count pre-filled cells (non-null values)
-      const preFilledCells = puzzle.startingBoard.flat().filter(cell => cell !== null);
-
-      expect(preFilledCells.length).toBe(4);
-    });
-  });
-
-  test('should have pre-filled cells with no more than 2 per row or column', () => {
+  test('should use only digits 1-9', () => {
     const puzzle = puzzleGenerator.generatePuzzle();
 
-    // Find positions of pre-filled cells
-    const preFilledPositions: Array<{row: number, col: number}> = [];
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        if (puzzle.startingBoard[row][col] !== null) {
-          preFilledPositions.push({row, col});
-        }
-      }
-    }
-
-    // Check that we have exactly 4 positions
-    expect(preFilledPositions.length).toBe(4);
-
-    // Check that no more than 2 cells are in the same row or column
-    const rowCounts = new Map<number, number>();
-    const colCounts = new Map<number, number>();
-
-    preFilledPositions.forEach(({row, col}) => {
-      const currentRowCount = rowCounts.get(row) || 0;
-      const currentColCount = colCounts.get(col) || 0;
-
-      rowCounts.set(row, currentRowCount + 1);
-      colCounts.set(col, currentColCount + 1);
+    // Check solution uses only 1-9
+    puzzle.solution.forEach(row => {
+      row.forEach(cell => {
+        expect(cell).toBeGreaterThanOrEqual(1);
+        expect(cell).toBeLessThanOrEqual(9);
+      });
     });
 
-    // Verify no row or column has more than 2 pre-filled cells
-    for (let row = 0; row < 4; row++) {
-      const rowCount = rowCounts.get(row) || 0;
-      expect(rowCount).toBeLessThanOrEqual(2);
-    }
+    // Check starting board uses only 1-9
+    const preFilledCells = puzzle.startingBoard
+      .flat()
+      .filter(cell => cell !== null);
+    preFilledCells.forEach(cell => {
+      expect(cell).toBeGreaterThanOrEqual(1);
+      expect(cell).toBeLessThanOrEqual(9);
+    });
+  });
 
-    for (let col = 0; col < 4; col++) {
-      const colCount = colCounts.get(col) || 0;
-      expect(colCount).toBeLessThanOrEqual(2);
-    }
+  test('should have valid constraint types', () => {
+    const puzzle = puzzleGenerator.generatePuzzle();
+    const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
+
+    allConstraints.forEach(constraint => {
+      const type = getConstraintType(constraint);
+      expect(['sum', 'even', 'odd', 'contains', 'range']).toContain(type);
+    });
+  });
+
+  test('should have exactly 8 constraints total', () => {
+    const puzzle = puzzleGenerator.generatePuzzle();
+    const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
+
+    expect(allConstraints.length).toBe(8);
+    expect(puzzle.rowConstraints.length).toBe(4);
+    expect(puzzle.colConstraints.length).toBe(4);
   });
 
   test('should generate consistent puzzles for the same date', () => {
@@ -155,5 +81,33 @@ describe('PuzzleGenerator', () => {
     const puzzle2 = puzzleGenerator.generatePuzzle('2024-01-02');
 
     expect(JSON.stringify(puzzle1)).not.toBe(JSON.stringify(puzzle2));
+  });
+
+  test('should have contains constraints only when no pre-filled cells', () => {
+    const puzzle = puzzleGenerator.generatePuzzle();
+
+    // Check rows with contains constraints
+    const rowsWithContains = puzzle.rowConstraints
+      .map((constraint, index) => ({ constraint, index }))
+      .filter(({ constraint }) => constraint.contains);
+
+    rowsWithContains.forEach(({ index }) => {
+      const hasPreFilled = puzzle.startingBoard[index].some(
+        cell => cell !== null
+      );
+      expect(hasPreFilled).toBe(false);
+    });
+
+    // Check columns with contains constraints
+    const colsWithContains = puzzle.colConstraints
+      .map((constraint, index) => ({ constraint, index }))
+      .filter(({ constraint }) => constraint.contains);
+
+    colsWithContains.forEach(({ index }) => {
+      const hasPreFilled = puzzle.startingBoard.some(
+        row => row[index] !== null
+      );
+      expect(hasPreFilled).toBe(false);
+    });
   });
 });

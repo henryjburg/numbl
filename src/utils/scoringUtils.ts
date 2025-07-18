@@ -1,40 +1,50 @@
-import { Puzzle, FeedbackType, ScoreBreakdown, GameStats } from '../types/puzzle';
+import {
+  Puzzle,
+  FeedbackType,
+  ScoreBreakdown,
+  GameStats,
+} from '../types/puzzle';
 
 // Scoring constants
 const SCORING = {
-  TIME_BONUSES: {
-    UNDER_2_MIN: 500,
-    UNDER_5_MIN: 200,
-    UNDER_10_MIN: 50,
-  },
-  TIME_MULTIPLIERS: {
-    UNDER_2_MIN: 2.0,
-    UNDER_5_MIN: 1.5,
-    UNDER_10_MIN: 1.2,
-  },
   FIRST_TIME_CORRECT_BONUS: 100,
   PERFECT_ACCURACY_BONUS: 300,
   EFFICIENCY_BONUS: 200,
   EFFICIENCY_THRESHOLD: 8,
-  DIFFICULTY_MULTIPLIERS: {
-    COMPLEX_CONSTRAINT: 1.2,
-    MULTIPLE_CONSTRAINTS: 1.1,
+  CORRECTNESS_MULTIPLIER_PER_FIRST_GUESS: 0.1,
+};
+
+export const calculateTimeBonuses = (
+  timeInSeconds: number
+): { bonus: number; multiplier: number } => {
+  // Maximum time bonus of 500 points for completing under 1 minute
+  const MAX_TIME_BONUS = 500;
+  const BONUS_DECREASE_PER_30_SECONDS = 100;
+  const ONE_MINUTE = 60;
+
+  if (timeInSeconds <= ONE_MINUTE) {
+    return { bonus: MAX_TIME_BONUS, multiplier: 1.0 };
   }
+
+  // Calculate how many 30-second intervals beyond 1 minute
+  const secondsBeyondOneMinute = timeInSeconds - ONE_MINUTE;
+  const thirtySecondIntervals = Math.ceil(secondsBeyondOneMinute / 30);
+
+  // Calculate time bonus: max bonus minus decrease for each 30-second interval
+  const timeBonus = Math.max(
+    0,
+    MAX_TIME_BONUS - thirtySecondIntervals * BONUS_DECREASE_PER_30_SECONDS
+  );
+
+  return { bonus: timeBonus, multiplier: 1.0 };
 };
 
-export const calculateTimeBonuses = (timeInSeconds: number): { bonus: number; multiplier: number } => {
-  if (timeInSeconds < 120) return { bonus: SCORING.TIME_BONUSES.UNDER_2_MIN, multiplier: SCORING.TIME_MULTIPLIERS.UNDER_2_MIN };
-  if (timeInSeconds < 300) return { bonus: SCORING.TIME_BONUSES.UNDER_5_MIN, multiplier: SCORING.TIME_MULTIPLIERS.UNDER_5_MIN };
-  if (timeInSeconds < 600) return { bonus: SCORING.TIME_BONUSES.UNDER_10_MIN, multiplier: SCORING.TIME_MULTIPLIERS.UNDER_10_MIN };
-  return { bonus: 0, multiplier: 1.0 };
-};
-
-export const calculateDifficultyMultiplier = (puzzle: Puzzle): number => {
-  let multiplier = 1.0;
-  const allConstraints = [...puzzle.rowConstraints, ...puzzle.colConstraints];
-  const hasComplexConstraints = allConstraints.some(c => c.onlyOdd || c.onlyEven || c.unique);
-  if (hasComplexConstraints) multiplier *= SCORING.DIFFICULTY_MULTIPLIERS.COMPLEX_CONSTRAINT;
-  return multiplier;
+export const calculateCorrectnessMultiplier = (
+  firstTimeCorrectCells: number
+): number => {
+  return (
+    1.0 + firstTimeCorrectCells * SCORING.CORRECTNESS_MULTIPLIER_PER_FIRST_GUESS
+  );
 };
 
 export const calculateRunningScore = (
@@ -42,11 +52,18 @@ export const calculateRunningScore = (
   feedback: FeedbackType[][],
   gameStats: GameStats
 ): number => {
-  const { correctGuesses, wrongGuesses, firstTimeCorrectRows, firstTimeCorrectCols } = gameStats;
+  const {
+    correctGuesses,
+    wrongGuesses,
+    firstTimeCorrectRows,
+    firstTimeCorrectCols,
+  } = gameStats;
 
   // Only count points from actual guesses
   const correctGuessPoints = correctGuesses * 50; // 50 points per correct guess
-  const firstTimeCorrectBonus = (firstTimeCorrectRows + firstTimeCorrectCols) * SCORING.FIRST_TIME_CORRECT_BONUS;
+  const firstTimeCorrectBonus =
+    (firstTimeCorrectRows + firstTimeCorrectCols) *
+    SCORING.FIRST_TIME_CORRECT_BONUS;
 
   const totalScore = correctGuessPoints + firstTimeCorrectBonus;
 
@@ -59,24 +76,44 @@ export const calculateScore = (
   feedback: FeedbackType[][],
   gameStats: GameStats
 ): ScoreBreakdown => {
-  const { timeInSeconds, totalGuesses, wrongGuesses, firstTimeCorrectRows, firstTimeCorrectCols } = gameStats;
+  const {
+    timeInSeconds,
+    totalGuesses,
+    wrongGuesses,
+    firstTimeCorrectRows,
+    firstTimeCorrectCols,
+    firstTimeCorrectCells,
+  } = gameStats;
 
-  const isCompleted = feedback.every(row => row.every(cell => cell === 'correct'));
+  const isCompleted = feedback.every(row =>
+    row.every(cell => cell === 'correct')
+  );
   const baseScore = 0; // No base score
 
-  const { bonus: timeBonus, multiplier: timeMultiplier } = calculateTimeBonuses(timeInSeconds);
-  const firstTimeCorrectBonus = (firstTimeCorrectRows + firstTimeCorrectCols) * SCORING.FIRST_TIME_CORRECT_BONUS;
+  const { bonus: timeBonus, multiplier: timeMultiplier } =
+    calculateTimeBonuses(timeInSeconds);
+  const firstTimeCorrectBonus =
+    (firstTimeCorrectRows + firstTimeCorrectCols) *
+    SCORING.FIRST_TIME_CORRECT_BONUS;
 
   // Only give these bonuses if puzzle is completed
-  const perfectAccuracyBonus = isCompleted && wrongGuesses === 0 ? SCORING.PERFECT_ACCURACY_BONUS : 0;
-  const efficiencyBonus = isCompleted && totalGuesses < SCORING.EFFICIENCY_THRESHOLD ? SCORING.EFFICIENCY_BONUS : 0;
+  const perfectAccuracyBonus =
+    isCompleted && wrongGuesses === 0 ? SCORING.PERFECT_ACCURACY_BONUS : 0;
+  const efficiencyBonus =
+    isCompleted && totalGuesses < SCORING.EFFICIENCY_THRESHOLD
+      ? SCORING.EFFICIENCY_BONUS
+      : 0;
 
-  // Only apply difficulty multiplier if there's actual gameplay or puzzle is completed
-  const hasGameplay = totalGuesses > 0 || isCompleted;
-  const difficultyMultiplier = hasGameplay ? calculateDifficultyMultiplier(puzzle) : 1.0;
+  // Calculate correctness multiplier based on first-time correct guesses
+  const correctnessMultiplier = calculateCorrectnessMultiplier(
+    firstTimeCorrectCells
+  );
 
-  const subtotal = timeBonus + firstTimeCorrectBonus + perfectAccuracyBonus + efficiencyBonus;
-  const totalScore = Math.round(subtotal * timeMultiplier * difficultyMultiplier);
+  const subtotal =
+    timeBonus + firstTimeCorrectBonus + perfectAccuracyBonus + efficiencyBonus;
+  const totalScore = Math.round(
+    subtotal * timeMultiplier * correctnessMultiplier
+  );
 
   return {
     baseScore,
@@ -85,8 +122,8 @@ export const calculateScore = (
     firstTimeCorrectBonus,
     perfectAccuracyBonus,
     efficiencyBonus,
-    difficultyMultiplier,
-    totalScore
+    difficultyMultiplier: correctnessMultiplier, // Keep the same property name for compatibility
+    totalScore,
   };
 };
 

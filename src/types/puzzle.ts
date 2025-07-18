@@ -1,30 +1,22 @@
 export interface Constraint {
   sum?: number;
-  onlyOdd?: boolean;
-  onlyEven?: boolean;
+  even?: boolean;
+  contains?: number[]; // Array of 2 digits that must be present
   range?: {
-    min: number | undefined;
-    max: number | undefined;
+    min: number;
+    max: number;
   };
-  contains?: number;
-  order?: 'increasing' | 'decreasing';
-  unique?: boolean;
-  // New exotic constraints
-  consecutive?: boolean;  // Contains consecutive numbers (e.g., 3,4,5)
-  fibonacci?: boolean;    // Contains Fibonacci numbers
-  prime?: boolean;        // Contains prime numbers
-  square?: boolean;       // Contains square numbers (1,4,9,16)
 }
 
 export interface Puzzle {
-  solution: number[][]; // 4x4
-  startingBoard: (number | null)[][]; // 4x4 with some pre-filled cells
+  solution: number[][]; // 4x4 with digits 1-9
+  startingBoard: (number | null)[][]; // 4x4 with some pre-filled cells (4-5)
   rowConstraints: Constraint[];
   colConstraints: Constraint[];
   date: string; // ISO date string for the puzzle
 }
 
-export type FeedbackType = "none" | "correct" | "misplaced" | "wrong" | "exists-elsewhere";
+export type FeedbackType = 'none' | 'correct' | 'misplaced' | 'wrong';
 
 export interface ScoreBreakdown {
   baseScore: number;
@@ -43,11 +35,12 @@ export interface GameStats {
   wrongGuesses: number;
   firstTimeCorrectRows: number;
   firstTimeCorrectCols: number;
+  firstTimeCorrectCells: number;
   timeInSeconds: number;
 }
 
 export interface ConstraintType {
-  type: 'sum' | 'evens' | 'odds' | 'range' | 'contains' | 'order' | 'consecutive' | 'fibonacci' | 'prime' | 'square';
+  type: 'sum' | 'even' | 'contains' | 'range';
   priority: number;
   used: boolean;
 }
