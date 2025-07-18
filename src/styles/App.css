@@ -46,6 +46,74 @@ body,
   gap: 1rem;
 }
 
+/* Desktop layout container */
+.numbl-desktop-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  gap: 1rem;
+}
+
+.numbl-desktop-left-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.numbl-desktop-right-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: var(--container-width);
+}
+
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .numbl-root {
+    padding: 2rem;
+  }
+
+  .numbl-desktop-container {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .numbl-desktop-left-column {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .numbl-desktop-right-column {
+    flex-shrink: 0;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Ensure the grid stays the same size on desktop */
+  .numbl-grid-container {
+    width: var(--container-width);
+  }
+
+  .numbl-grid {
+    width: var(--grid-size);
+    height: var(--grid-size);
+  }
+}
+
 /* Header */
 .numbl-header {
   width: var(--container-width);
@@ -776,6 +844,13 @@ body,
 @media (min-width: 768px) {
   :root {
     --container-width: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --container-width: 400px;
+    --grid-size: 400px;
   }
 }
 
